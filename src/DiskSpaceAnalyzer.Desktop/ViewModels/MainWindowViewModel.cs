@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DiskSpaceAnalyzer.Core.Abstractions;
+using DiskSpaceAnalyzer.Core.Cleanup;
 using DiskSpaceAnalyzer.Core.Formatting;
 using DiskSpaceAnalyzer.Core.Models;
 using DiskSpaceAnalyzer.Core.Scanning;
@@ -15,22 +16,26 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     private readonly IFolderPickerService _folderPicker;
     private readonly INodeViewModelFactory _nodeFactory;
     private readonly ISizeFormatter _sizeFormatter;
+    private readonly ICleanupAnalyzer _cleanupAnalyzer;
 
     public MainWindowViewModel(
         IDirectoryScanner scanner,
         IFolderPickerService folderPicker,
         INodeViewModelFactory nodeFactory,
-        ISizeFormatter sizeFormatter)
+        ISizeFormatter sizeFormatter,
+        ICleanupAnalyzer cleanupAnalyzer)
     {
         ArgumentNullException.ThrowIfNull(scanner);
         ArgumentNullException.ThrowIfNull(folderPicker);
         ArgumentNullException.ThrowIfNull(nodeFactory);
         ArgumentNullException.ThrowIfNull(sizeFormatter);
+        ArgumentNullException.ThrowIfNull(cleanupAnalyzer);
 
         _scanner = scanner;
         _folderPicker = folderPicker;
         _nodeFactory = nodeFactory;
         _sizeFormatter = sizeFormatter;
+        _cleanupAnalyzer = cleanupAnalyzer;
     }
 
     [ObservableProperty]
@@ -88,7 +93,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             root.IsExpanded = true;
             RootNodes.Add(root);
 
-            Summary = new ScanSummaryViewModel(result, _sizeFormatter);
+            Summary = new ScanSummaryViewModel(result, _sizeFormatter, _cleanupAnalyzer.Analyze(result.Root));
             StatusMessage = BuildCompletionMessage(result);
         }
         catch (OperationCanceledException)

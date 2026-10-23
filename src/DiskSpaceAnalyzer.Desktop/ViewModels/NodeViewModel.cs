@@ -1,6 +1,7 @@
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DiskSpaceAnalyzer.Core.Cleanup;
 using DiskSpaceAnalyzer.Core.Formatting;
 using DiskSpaceAnalyzer.Core.Models;
 using DiskSpaceAnalyzer.Desktop.Services;
@@ -16,14 +17,17 @@ public sealed partial class NodeViewModel : ViewModelBase
     private readonly FileSystemNode _node;
     private readonly INodeViewModelFactory _factory;
     private readonly IFileExplorerService _fileExplorer;
+    private readonly CleanupMark? _cleanupMark;
     private IReadOnlyList<NodeViewModel>? _children;
 
+    /// <param name="cleanupMark">Si la ruta es (o está dentro de) una ubicación segura de limpiar; <c>null</c> si no.</param>
     public NodeViewModel(
         FileSystemNode node,
         long parentSizeInBytes,
         ISizeFormatter sizeFormatter,
         INodeViewModelFactory factory,
-        IFileExplorerService fileExplorer)
+        IFileExplorerService fileExplorer,
+        CleanupMark? cleanupMark = null)
     {
         ArgumentNullException.ThrowIfNull(node);
         ArgumentNullException.ThrowIfNull(sizeFormatter);
@@ -33,6 +37,7 @@ public sealed partial class NodeViewModel : ViewModelBase
         _node = node;
         _factory = factory;
         _fileExplorer = fileExplorer;
+        _cleanupMark = cleanupMark;
 
         SizeText = sizeFormatter.Format(node.SizeInBytes);
         Percent = parentSizeInBytes > 0 ? node.SizeInBytes * 100d / parentSizeInBytes : 0;
@@ -45,6 +50,25 @@ public sealed partial class NodeViewModel : ViewModelBase
     public bool IsDirectory => _node.Kind == NodeKind.Directory;
 
     public bool HasAccessErrors => _node.HasAccessErrors;
+
+    /// <summary>La ruta es, o está dentro de, una ubicación segura de limpiar.</summary>
+    public bool IsCleanupMarked => _cleanupMark is not null;
+
+    /// <summary>La ruta ES la ubicación segura (la que recibe la etiqueta y el color de fila).</summary>
+    public bool IsCleanupRoot => _cleanupMark is { IsRoot: true };
+
+    // La vista elige icono con un solo booleano por elemento, así que estos dos cubren los casos.
+    public bool IsPlainDirectory => IsDirectory && !IsCleanupMarked;
+
+    public bool IsCleanupDirectory => IsDirectory && IsCleanupMarked;
+
+    /// <summary>Texto del tooltip de la fila; <c>null</c> (sin tooltip) si no es limpiable.</summary>
+    public string? CleanupTooltip => _cleanupMark switch
+    {
+        null => null,
+        { IsRoot: true } mark => $"Seguro de limpiar: {mark.Rule.Name}\n{mark.Rule.Description}",
+        var mark => $"Dentro de una ubicación segura de limpiar: «{mark.Rule.Name}»\n{mark.Rule.Description}",
+    };
 
     public string SizeText { get; }
 

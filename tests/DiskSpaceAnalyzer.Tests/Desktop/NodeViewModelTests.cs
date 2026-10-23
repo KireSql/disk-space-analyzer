@@ -12,7 +12,8 @@ public class NodeViewModelTests
     private readonly NodeViewModelFactory _factory;
 
     public NodeViewModelTests()
-        => _factory = new NodeViewModelFactory(new BinarySizeFormatter(CultureInfo.InvariantCulture), _explorer);
+        => _factory = new NodeViewModelFactory(
+            new BinarySizeFormatter(CultureInfo.InvariantCulture), _explorer, NoCleanup.Advisor);
 
     private static DirectoryNode SampleTree() => new(
         "root",

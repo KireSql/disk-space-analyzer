@@ -12,6 +12,7 @@
         <!-- Iconos de Material Design Icons (Apache 2.0), 24x24. -->
         <StreamGeometry x:Key="FolderIcon">M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z</StreamGeometry>
         <StreamGeometry x:Key="FileIcon">M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2Z</StreamGeometry>
+        <StreamGeometry x:Key="CheckCircleIcon">M12 2C6.5 2 2 6.5 2 12S6.5 22 12 22 22 17.5 22 12 17.5 2 12 2M10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z</StreamGeometry>
     </Window.Resources>
 
     <Window.Styles>
@@ -27,6 +28,16 @@
         </Style>
         <Style Selector=".percent-cell" x:SetterTargetType="Control">
             <Setter Property="Width" Value="190" />
+        </Style>
+
+        <!-- Fila del árbol. Las ubicaciones seguras de limpiar (clase "cleanup", enlazada al ViewModel) se
+             tiñen de verde. El fondo va en estilos, no en el elemento, para que la clase pueda cambiarlo. -->
+        <Style Selector="Border.node-row">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="CornerRadius" Value="8" />
+        </Style>
+        <Style Selector="Border.node-row.cleanup">
+            <Setter Property="Background" Value="#1A4ADE80" />
         </Style>
 
         <!-- Valores por defecto (pantalla ancha). Van en estilos y no en el elemento porque un valor local
@@ -137,9 +148,10 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Tarjetas de resumen -->
-                <UniformGrid x:Name="Tiles" Grid.Row="2" RowSpacing="12" ColumnSpacing="12"
-                             IsVisible="{Binding HasSummary}">
+                <!-- Resumen: tarjetas de cifras y, si corresponde, aviso de espacio recuperable -->
+                <StackPanel Grid.Row="2" Spacing="12" IsVisible="{Binding HasSummary}">
+
+                <UniformGrid x:Name="Tiles" RowSpacing="12" ColumnSpacing="12">
                     <Border Classes="tile">
                         <StackPanel Spacing="4">
                             <TextBlock Classes="caption" Text="TAMAÑO TOTAL" />
@@ -167,6 +179,27 @@
                     </Border>
                 </UniformGrid>
 
+                <!-- Solo informa: la aplicación no borra nada. -->
+                <Border Classes="callout" IsVisible="{Binding Summary.HasReclaimable}">
+                    <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="16">
+                        <PathIcon Grid.Column="0" Data="{StaticResource CheckCircleIcon}" Width="28" Height="28"
+                                  Foreground="{DynamicResource SuccessBrush}" VerticalAlignment="Center" />
+                        <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Classes="caption" Text="RECUPERABLE" />
+                            <TextBlock Classes="tile-value" Text="{Binding Summary.ReclaimableSize}"
+                                       Foreground="{DynamicResource SuccessBrush}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Summary.ReclaimableHeadline}" FontWeight="SemiBold"
+                                       TextWrapping="Wrap" />
+                            <TextBlock Classes="muted" Text="{Binding Summary.ReclaimableDetails}"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                </StackPanel>
+
                 <!-- Resultado: encabezados + árbol -->
                 <Border Grid.Row="3" Classes="card" Padding="8" ClipToBounds="True">
                     <Panel>
@@ -174,7 +207,7 @@
                         <Grid RowDefinitions="Auto,Auto,*" IsVisible="{Binding !ShowEmptyState}">
 
                             <!-- Mismas columnas y margen derecho que la plantilla de cada fila, para que queden alineadas. -->
-                            <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" Margin="28,8,18,8">
+                            <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" Margin="34,8,18,8">
                                 <TextBlock Grid.Column="0" Classes="caption" Text="NOMBRE" />
                                 <TextBlock Grid.Column="1" Classes="caption size-cell" Text="TAMAÑO" />
                                 <TextBlock Grid.Column="2" Classes="caption percent-cell" Text="% DEL CONTENEDOR"
@@ -190,8 +223,12 @@
                                       ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                 <TreeView.ItemTemplate>
                                     <TreeDataTemplate DataType="vm:NodeViewModel" ItemsSource="{Binding Children}">
-                                        <!-- Background transparente: sin él, solo respondería al clic derecho sobre el texto. -->
-                                        <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,5,16,5" Background="Transparent">
+                                        <!-- El fondo (transparente por defecto, verde si es ubicación segura) viene de los
+                                             estilos "node-row"; así toda la fila responde al clic derecho, no solo el texto. -->
+                                        <Border Classes="node-row" Classes.cleanup="{Binding IsCleanupRoot}"
+                                                Padding="6,5,16,5" ToolTip.Tip="{Binding CleanupTooltip}">
+
+                                          <Grid ColumnDefinitions="*,Auto,Auto">
 
                                             <Grid.ContextMenu>
                                                 <ContextMenu>
@@ -204,15 +241,22 @@
                                                 </ContextMenu>
                                             </Grid.ContextMenu>
 
-                                            <Grid Grid.Column="0" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                            <Grid Grid.Column="0" ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
+                                                <!-- Carpeta ámbar normal, o verde si es una ubicación segura de limpiar (o está dentro de una). -->
                                                 <PathIcon Grid.Column="0" Data="{StaticResource FolderIcon}" Foreground="#F5B84B"
-                                                          Width="16" Height="16" IsVisible="{Binding IsDirectory}" />
+                                                          Width="16" Height="16" IsVisible="{Binding IsPlainDirectory}" />
+                                                <PathIcon Grid.Column="0" Data="{StaticResource FolderIcon}"
+                                                          Foreground="{DynamicResource SuccessBrush}"
+                                                          Width="16" Height="16" IsVisible="{Binding IsCleanupDirectory}" />
                                                 <PathIcon Grid.Column="0" Data="{StaticResource FileIcon}"
                                                           Foreground="{DynamicResource TextMutedBrush}"
                                                           Width="16" Height="16" IsVisible="{Binding !IsDirectory}" />
                                                 <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center"
                                                            TextTrimming="CharacterEllipsis" />
-                                                <TextBlock Grid.Column="2" Text="⚠" VerticalAlignment="Center" Margin="8,0,0,0"
+                                                <Border Grid.Column="2" Classes="badge-safe" IsVisible="{Binding IsCleanupRoot}">
+                                                    <TextBlock Text="LIMPIABLE" />
+                                                </Border>
+                                                <TextBlock Grid.Column="3" Text="⚠" VerticalAlignment="Center"
                                                            Foreground="{DynamicResource WarningBrush}"
                                                            IsVisible="{Binding HasAccessErrors}"
                                                            ToolTip.Tip="No se pudo leer todo el contenido de esta carpeta." />
@@ -230,7 +274,8 @@
                                                            HorizontalAlignment="Right" VerticalAlignment="Center" />
                                             </Grid>
 
-                                        </Grid>
+                                          </Grid>
+                                        </Border>
                                     </TreeDataTemplate>
                                 </TreeView.ItemTemplate>
                             </TreeView>

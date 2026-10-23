@@ -4,4 +4,14 @@
     <ProjectReference Include="..\DiskSpaceAnalyzer.Core\DiskSpaceAnalyzer.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="DiskSpaceAnalyzer.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Un archivo por sistema operativo (windows.json, linux.json, macos.json). Se incrustan en el
+         ensamblado: no hay archivos que desplegar y funcionan igual al publicar en un único .exe. -->
+    <EmbeddedResource Include="CleanupRules\*.json" LogicalName="CleanupRules.%(Filename)%(Extension)" />
+  </ItemGroup>
+
 </Project>

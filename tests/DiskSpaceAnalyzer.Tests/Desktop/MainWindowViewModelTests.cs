@@ -1,5 +1,6 @@
 using System.Globalization;
 using DiskSpaceAnalyzer.Core.Abstractions;
+using DiskSpaceAnalyzer.Core.Cleanup;
 using DiskSpaceAnalyzer.Core.Formatting;
 using DiskSpaceAnalyzer.Core.Models;
 using DiskSpaceAnalyzer.Desktop.ViewModels;
@@ -21,12 +22,20 @@ public class MainWindowViewModelTests
         InaccessibleDirectories: inaccessible,
         Elapsed: TimeSpan.FromSeconds(1.5));
 
-    private static MainWindowViewModel CreateViewModel(IDirectoryScanner scanner, string? pickedPath = null)
-        => new(
+    private static MainWindowViewModel CreateViewModel(
+        IDirectoryScanner scanner,
+        string? pickedPath = null,
+        CleanupAdvisor? cleanup = null)
+    {
+        cleanup ??= NoCleanup.Advisor;
+
+        return new MainWindowViewModel(
             scanner,
             new FakeFolderPickerService(pickedPath),
-            new NodeViewModelFactory(Formatter, new FakeFileExplorerService()),
-            Formatter);
+            new NodeViewModelFactory(Formatter, new FakeFileExplorerService(), cleanup),
+            Formatter,
+            cleanup);
+    }
 
     [Fact]
     public void ScanCommand_CannotRunWithoutAPath()
@@ -79,6 +88,33 @@ public class MainWindowViewModelTests
         await vm.ScanCommand.ExecuteAsync(null);
 
         Assert.Equal($"Análisis completado en {ElapsedText}.{expectedSuffix}", vm.StatusMessage);
+    }
+
+    [Fact]
+    public async Task Scan_ReportsReclaimableSpaceWhenTheTreeContainsASafeLocation()
+    {
+        var rule = new CleanupRule("root", "Raíz de prueba", "Descripción.", "/root");
+        var cleanup = new CleanupAdvisor([rule], StringComparison.Ordinal);
+        var vm = CreateViewModel(FakeDirectoryScanner.Returning(SampleResult()), cleanup: cleanup);
+        vm.SelectedPath = "/root";
+
+        await vm.ScanCommand.ExecuteAsync(null);
+
+        Assert.True(vm.Summary?.HasReclaimable);
+        Assert.Equal("2 KB", vm.Summary?.ReclaimableSize);
+        Assert.True(vm.RootNodes[0].IsCleanupRoot);
+    }
+
+    [Fact]
+    public async Task Scan_ReportsNothingReclaimableWithoutRules()
+    {
+        var vm = CreateViewModel(FakeDirectoryScanner.Returning(SampleResult()));
+        vm.SelectedPath = "/root";
+
+        await vm.ScanCommand.ExecuteAsync(null);
+
+        Assert.False(vm.Summary?.HasReclaimable);
+        Assert.False(vm.RootNodes[0].IsCleanupMarked);
     }
 
     [Fact]

@@ -1,0 +1,47 @@
+{
+  "platform": "windows",
+  "rules": [
+    {
+      "id": "windows-user-temp",
+      "name": "Archivos temporales del usuario",
+      "path": "%LOCALAPPDATA%\\Temp",
+      "description": "Temporales de programas e instaladores. Se vuelven a crear cuando hacen falta. Los archivos que estén en uso no se podrán borrar."
+    },
+    {
+      "id": "nvidia-dxcache",
+      "name": "Caché de shaders DirectX (NVIDIA)",
+      "path": "%LOCALAPPDATA%\\NVIDIA\\DXCache",
+      "description": "Caché de shaders que el controlador regenera solo. La primera vez que abras cada juego puede cargar algo más lento."
+    },
+    {
+      "id": "nvidia-glcache",
+      "name": "Caché de shaders OpenGL/Vulkan (NVIDIA)",
+      "path": "%LOCALAPPDATA%\\NVIDIA\\GLCache",
+      "description": "Caché de shaders que el controlador regenera solo. La primera carga de algunos juegos o programas puede tardar un poco más."
+    },
+    {
+      "id": "windows-d3d-shader-cache",
+      "name": "Caché de shaders de DirectX (Windows)",
+      "path": "%LOCALAPPDATA%\\D3DSCache",
+      "description": "Caché de shaders de Windows. Se regenera automáticamente al volver a usar las aplicaciones gráficas."
+    },
+    {
+      "id": "windows-crash-dumps",
+      "name": "Volcados de memoria de programas",
+      "path": "%LOCALAPPDATA%\\CrashDumps",
+      "description": "Archivos que se generan cuando un programa se cierra de forma inesperada. Solo sirven para diagnosticar fallos."
+    },
+    {
+      "id": "windows-inet-cache",
+      "name": "Caché de Internet de Windows",
+      "path": "%LOCALAPPDATA%\\Microsoft\\Windows\\INetCache",
+      "description": "Archivos descargados por componentes de Windows y navegadores heredados. Se vuelven a descargar si hacen falta."
+    },
+    {
+      "id": "windows-system-temp",
+      "name": "Archivos temporales del sistema",
+      "path": "%SystemRoot%\\Temp",
+      "description": "Temporales del sistema y de servicios. Borrar su contenido puede requerir permisos de administrador."
+    }
+  ]
+}
