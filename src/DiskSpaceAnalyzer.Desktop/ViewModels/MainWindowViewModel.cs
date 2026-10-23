@@ -38,10 +38,21 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     public partial string SelectedPath { get; set; } = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowEmptyState))]
     public partial bool IsScanning { get; set; }
 
     [ObservableProperty]
     public partial string StatusMessage { get; set; } = "Elige una carpeta y pulsa «Analizar».";
+
+    /// <summary>Cifras del último análisis completado; <c>null</c> mientras no haya resultado.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSummary), nameof(ShowEmptyState))]
+    public partial ScanSummaryViewModel? Summary { get; set; }
+
+    public bool HasSummary => Summary is not null;
+
+    /// <summary>Verdadero cuando no hay nada que mostrar ni se está analizando: invita a elegir una carpeta.</summary>
+    public bool ShowEmptyState => !IsScanning && Summary is null;
 
     /// <summary>Raíz del árbol mostrado (una sola, pero el TreeView espera una colección).</summary>
     public ObservableCollection<NodeViewModel> RootNodes { get; } = [];
@@ -63,6 +74,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     private async Task ScanAsync(CancellationToken cancellationToken)
     {
         IsScanning = true;
+        Summary = null;
         RootNodes.Clear();
         StatusMessage = "Analizando…";
 
@@ -76,7 +88,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             root.IsExpanded = true;
             RootNodes.Add(root);
 
-            StatusMessage = BuildSummary(result);
+            Summary = new ScanSummaryViewModel(result, _sizeFormatter);
+            StatusMessage = BuildCompletionMessage(result);
         }
         catch (OperationCanceledException)
         {
@@ -96,13 +109,16 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         => StatusMessage = $"Analizando… {progress.FilesScanned:N0} archivos · "
                            + $"{_sizeFormatter.Format(progress.BytesScanned)} · {progress.CurrentPath}";
 
-    private string BuildSummary(ScanResult result)
+    // Las cifras detalladas van en las tarjetas de resumen; aquí solo el cierre y las advertencias.
+    private static string BuildCompletionMessage(ScanResult result)
     {
-        var summary = $"Listo: {_sizeFormatter.Format(result.Root.SizeInBytes)} en {result.FilesScanned:N0} archivos "
-                      + $"y {result.DirectoriesScanned:N0} carpetas ({result.Elapsed.TotalSeconds:0.0} s).";
+        var message = $"Análisis completado en {result.Elapsed.TotalSeconds:0.0} s.";
 
-        return result.InaccessibleDirectories > 0
-            ? $"{summary} {result.InaccessibleDirectories:N0} carpetas sin acceso (marcadas con ⚠)."
-            : summary;
+        return result.InaccessibleDirectories switch
+        {
+            0 => message,
+            1 => $"{message} 1 carpeta sin acceso (marcada con ⚠).",
+            var count => $"{message} {count:N0} carpetas sin acceso (marcadas con ⚠).",
+        };
     }
 }

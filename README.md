@@ -92,6 +92,20 @@ Desktop ──► Infrastructure ──► Core
 - **MVVM + Command**: `CommunityToolkit.Mvvm` (`[ObservableProperty]`, `[RelayCommand]`).
 - **Dependency Injection**: `Microsoft.Extensions.DependencyInjection` con una única raíz de composición.
 
+## Interfaz
+
+Tema oscuro con acento coral, definido en `src/DiskSpaceAnalyzer.Desktop/Styles/Theme.axaml` (paleta, tarjetas, tipografía, botones). La disposición de la ventana principal está en `Views/MainWindow.axaml`.
+
+**Responsive:** Avalonia no tiene *media queries*, así que `MainWindow.axaml.cs` marca la ventana con una clase según su ancho y el XAML decide qué cambia:
+
+| Ancho | Clase | Cambios |
+|---|---|---|
+| ≥ 900 px | — | Diseño completo; el contenido se centra con un máximo de 1280 px |
+| < 900 px | `compact` | Menos espaciado y barra de porcentaje más corta |
+| < 600 px | `narrow` | Se oculta el porcentaje, los botones bajan a su propia fila y las tarjetas de resumen pasan a 2 × 2 |
+
+> Al ajustar estilos responsive: un valor escrito directamente en el elemento (`Padding="32"`) gana siempre a un estilo, así que los valores por defecto de lo que cambia con el ancho van en `Window.Styles`, no en el elemento.
+
 ## Decisiones a tener en cuenta
 
 - **Tamaño** = tamaño lógico del archivo, no el espacio realmente ocupado en disco (clústeres, compresión, archivos de OneDrive solo en la nube).

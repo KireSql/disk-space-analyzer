@@ -1,0 +1,120 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Paleta y estilos globales. La disposición específica de cada pantalla vive en su vista. -->
+
+    <Styles.Resources>
+        <SolidColorBrush x:Key="BackgroundBrush" Color="#09090B" />
+        <SolidColorBrush x:Key="SurfaceBrush" Color="#111113" />
+        <SolidColorBrush x:Key="SurfaceRaisedBrush" Color="#18181B" />
+        <SolidColorBrush x:Key="BorderSubtleBrush" Color="#27272A" />
+
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#F4F4F5" />
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#A1A1AA" />
+        <SolidColorBrush x:Key="TextMutedBrush" Color="#71717A" />
+
+        <SolidColorBrush x:Key="AccentBrush" Color="#F0563C" />
+        <SolidColorBrush x:Key="SuccessBrush" Color="#4ADE80" />
+        <SolidColorBrush x:Key="WarningBrush" Color="#FBBF24" />
+
+        <LinearGradientBrush x:Key="AccentGradientBrush" StartPoint="0%,50%" EndPoint="100%,50%">
+            <GradientStop Color="#F0563C" Offset="0" />
+            <GradientStop Color="#FF9A6B" Offset="1" />
+        </LinearGradientBrush>
+
+        <!-- Colores de las filas del árbol (recursos que consume la plantilla Fluent de TreeViewItem). -->
+        <SolidColorBrush x:Key="TreeViewItemBackgroundPointerOver" Color="#0DFFFFFF" />
+        <SolidColorBrush x:Key="TreeViewItemBackgroundPressed" Color="#0DFFFFFF" />
+        <SolidColorBrush x:Key="TreeViewItemBackgroundSelected" Color="#14F0563C" />
+        <SolidColorBrush x:Key="TreeViewItemBackgroundSelectedPointerOver" Color="#1AF0563C" />
+        <SolidColorBrush x:Key="TreeViewItemBackgroundSelectedPressed" Color="#14F0563C" />
+    </Styles.Resources>
+
+    <!-- Contenedores -->
+    <Style Selector="Border.card">
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderSubtleBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="16" />
+        <Setter Property="BoxShadow" Value="0 12 32 0 #66000000" />
+    </Style>
+
+    <Style Selector="Border.tile">
+        <Setter Property="Background" Value="{DynamicResource SurfaceRaisedBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderSubtleBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="14" />
+        <Setter Property="Padding" Value="16,14" />
+    </Style>
+
+    <!-- Tipografía -->
+    <Style Selector="TextBlock.title">
+        <Setter Property="FontSize" Value="26" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.subtitle">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.caption">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="LetterSpacing" Value="0.8" />
+        <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.tile-value">
+        <Setter Property="FontSize" Value="22" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.muted">
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+    </Style>
+
+    <!-- Controles -->
+    <Style Selector="Button">
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="16,9" />
+        <Setter Property="FontWeight" Value="Medium" />
+    </Style>
+
+    <Style Selector="Button.ghost">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderSubtleBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <!-- Campo de texto con aspecto de terminal: sin marco, el borde lo da la tarjeta. -->
+    <Style Selector="TextBox.terminal">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="FontFamily" Value="Cascadia Mono, Consolas, Menlo, monospace" />
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="Padding" Value="0,6" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="CaretBrush" Value="{DynamicResource AccentBrush}" />
+    </Style>
+    <Style Selector="TextBox.terminal:pointerover /template/ Border#PART_BorderElement, TextBox.terminal:focus /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <!-- Barra de progreso fina con degradado -->
+    <Style Selector="ProgressBar.bar">
+        <Setter Property="Height" Value="6" />
+        <Setter Property="MinWidth" Value="0" />
+        <Setter Property="CornerRadius" Value="3" />
+        <Setter Property="Background" Value="{DynamicResource BorderSubtleBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentGradientBrush}" />
+    </Style>
+
+    <Style Selector="TreeViewItem">
+        <Setter Property="CornerRadius" Value="8" />
+    </Style>
+
+</Styles>

@@ -4,7 +4,8 @@
         x:Class="DiskSpaceAnalyzer.Desktop.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="Disk Space Analyzer"
-        Width="900" Height="620" MinWidth="640" MinHeight="400">
+        Background="{DynamicResource BackgroundBrush}"
+        Width="1000" Height="680" MinWidth="420" MinHeight="420">
 
     <Window.Resources>
         <!-- Iconos de Material Design Icons (Apache 2.0), 24x24. -->
@@ -17,76 +18,225 @@
         <Style Selector="TreeViewItem" x:DataType="vm:NodeViewModel">
             <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
         </Style>
+
+        <!-- Anchos de las columnas de datos. Se comparten entre encabezado y filas para que queden alineadas. -->
+        <Style Selector="TextBlock.size-cell">
+            <Setter Property="Width" Value="96" />
+            <Setter Property="TextAlignment" Value="Right" />
+        </Style>
+        <Style Selector=".percent-cell" x:SetterTargetType="Control">
+            <Setter Property="Width" Value="190" />
+        </Style>
+
+        <!-- Valores por defecto (pantalla ancha). Van en estilos y no en el elemento porque un valor local
+             siempre gana a un estilo, y entonces las reglas responsive de abajo no podrían sobrescribirlos. -->
+        <Style Selector="Border#Shell">
+            <Setter Property="Padding" Value="32" />
+        </Style>
+        <Style Selector="UniformGrid#Tiles">
+            <Setter Property="Columns" Value="4" />
+        </Style>
+        <Style Selector="Grid#Actions">
+            <Setter Property="Grid.Row" Value="0" />
+            <Setter Property="Grid.Column" Value="1" />
+        </Style>
+
+        <!-- Responsive. La clase "compact" (< 900 px) y "narrow" (< 600 px) las gestiona MainWindow.axaml.cs. -->
+        <Style Selector="Window.compact Border#Shell">
+            <Setter Property="Padding" Value="20" />
+        </Style>
+        <Style Selector="Window.compact .percent-cell" x:SetterTargetType="Control">
+            <Setter Property="Width" Value="130" />
+        </Style>
+
+        <Style Selector="Window.narrow Border#Shell">
+            <Setter Property="Padding" Value="12" />
+        </Style>
+        <Style Selector="Window.narrow TextBlock.title">
+            <Setter Property="FontSize" Value="21" />
+        </Style>
+        <Style Selector="Window.narrow .percent-cell" x:SetterTargetType="Control">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="Window.narrow UniformGrid#Tiles">
+            <Setter Property="Columns" Value="2" />
+        </Style>
+        <Style Selector="Window.narrow Grid#Actions">
+            <Setter Property="Grid.Row" Value="1" />
+            <Setter Property="Grid.Column" Value="0" />
+            <Setter Property="Grid.ColumnSpan" Value="2" />
+        </Style>
     </Window.Styles>
 
-    <DockPanel Margin="12">
+    <Panel>
 
-        <!-- Barra superior: ruta y acciones -->
-        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="8" Margin="0,0,0,12">
-            <TextBox Grid.Column="0"
-                     Text="{Binding SelectedPath, Mode=TwoWay}"
-                     PlaceholderText="Ruta de la carpeta a analizar"
-                     IsEnabled="{Binding !IsScanning}">
-                <TextBox.KeyBindings>
-                    <KeyBinding Gesture="Enter" Command="{Binding ScanCommand}" />
-                </TextBox.KeyBindings>
-            </TextBox>
-            <Button Grid.Column="1" Content="Examinar…"
-                    Command="{Binding BrowseCommand}"
-                    IsEnabled="{Binding !IsScanning}" />
-            <Button Grid.Column="2" Content="Analizar" Classes="accent"
-                    Command="{Binding ScanCommand}" />
-            <Button Grid.Column="3" Content="Cancelar"
-                    Command="{Binding ScanCancelCommand}"
-                    IsVisible="{Binding IsScanning}" />
-        </Grid>
+        <!-- Resplandor decorativo en la parte superior -->
+        <Border Height="440" VerticalAlignment="Top" IsHitTestVisible="False">
+            <Border.Background>
+                <RadialGradientBrush Center="50%,0%" GradientOrigin="50%,0%" RadiusX="75%" RadiusY="100%">
+                    <GradientStop Color="#40F0563C" Offset="0" />
+                    <GradientStop Color="#00F0563C" Offset="1" />
+                </RadialGradientBrush>
+            </Border.Background>
+        </Border>
 
-        <!-- Barra inferior: estado -->
-        <StackPanel DockPanel.Dock="Bottom" Spacing="6" Margin="0,8,0,0">
-            <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsScanning}" />
-            <TextBlock Text="{Binding StatusMessage}" TextTrimming="CharacterEllipsis" Opacity="0.8" />
-        </StackPanel>
+        <Border x:Name="Shell">
+            <Grid MaxWidth="1280" RowDefinitions="Auto,Auto,Auto,*" RowSpacing="16">
 
-        <!-- Resultado: encabezados + árbol -->
-        <Grid RowDefinitions="Auto,*">
+                <!-- Encabezado -->
+                <StackPanel Grid.Row="0" Spacing="2">
+                    <TextBlock Classes="title" Text="Disk Space Analyzer" />
+                    <TextBlock Classes="subtitle" Text="Descubre qué carpetas y archivos ocupan tu espacio." />
+                </StackPanel>
 
-            <Grid Grid.Row="0" ColumnDefinitions="*,110,150" Margin="28,0,8,4">
-                <TextBlock Grid.Column="0" Text="Nombre" FontWeight="SemiBold" />
-                <TextBlock Grid.Column="1" Text="Tamaño" FontWeight="SemiBold" HorizontalAlignment="Right" />
-                <TextBlock Grid.Column="2" Text="% del contenedor" FontWeight="SemiBold" Margin="16,0,0,0" />
-            </Grid>
+                <!-- Bloque tipo terminal: ruta, estado y acciones -->
+                <Border Grid.Row="1" Classes="card" Padding="20,16">
+                    <StackPanel Spacing="14">
 
-            <TreeView Grid.Row="1" ItemsSource="{Binding RootNodes}">
-                <TreeView.ItemTemplate>
-                    <TreeDataTemplate DataType="vm:NodeViewModel" ItemsSource="{Binding Children}">
-                        <Grid ColumnDefinitions="*,110,150">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                            <TextBlock Grid.Column="0" Text="›" FontSize="20" FontWeight="Bold"
+                                       Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center" />
+                            <TextBox Grid.Column="1" Classes="terminal"
+                                     Text="{Binding SelectedPath, Mode=TwoWay}"
+                                     PlaceholderText="Ruta de la carpeta a analizar"
+                                     IsEnabled="{Binding !IsScanning}">
+                                <TextBox.KeyBindings>
+                                    <KeyBinding Gesture="Enter" Command="{Binding ScanCommand}" />
+                                </TextBox.KeyBindings>
+                            </TextBox>
+                        </Grid>
 
-                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6">
-                                <PathIcon Data="{StaticResource FolderIcon}" Foreground="#E0A93B"
-                                          Width="16" Height="16" IsVisible="{Binding IsDirectory}" />
-                                <PathIcon Data="{StaticResource FileIcon}" Opacity="0.7"
-                                          Width="16" Height="16" IsVisible="{Binding !IsDirectory}" />
-                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
-                                <TextBlock Text="⚠" Foreground="OrangeRed" VerticalAlignment="Center"
-                                           IsVisible="{Binding HasAccessErrors}"
-                                           ToolTip.Tip="No se pudo leer todo el contenido de esta carpeta (acceso denegado)." />
-                            </StackPanel>
+                        <Border Height="1" Background="{DynamicResource BorderSubtleBrush}" />
 
-                            <TextBlock Grid.Column="1" Text="{Binding SizeText}"
-                                       HorizontalAlignment="Right" VerticalAlignment="Center" />
+                        <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" ColumnSpacing="12" RowSpacing="12">
 
-                            <Grid Grid.Column="2" ColumnDefinitions="*,56" Margin="16,0,0,0">
-                                <ProgressBar Grid.Column="0" Minimum="0" Maximum="100" Height="10"
-                                             Value="{Binding Percent}" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="1" Text="{Binding PercentText}"
-                                           HorizontalAlignment="Right" VerticalAlignment="Center" />
+                            <!-- Columna "*": el texto ocupa el ancho disponible y salta de línea en lugar de pisar los botones. -->
+                            <Grid Grid.Row="0" Grid.Column="0" ColumnDefinitions="Auto,*" ColumnSpacing="8"
+                                  VerticalAlignment="Center">
+                                <TextBlock Grid.Column="0" Text="✓" FontWeight="Bold"
+                                           Foreground="{DynamicResource SuccessBrush}"
+                                           IsVisible="{Binding HasSummary}" />
+                                <TextBlock Grid.Column="1" Classes="muted" Text="{Binding StatusMessage}"
+                                           TextWrapping="Wrap" />
                             </Grid>
 
+                            <Grid x:Name="Actions" ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="8">
+                                <Button Grid.Column="0" Classes="ghost" Content="Examinar…"
+                                        Command="{Binding BrowseCommand}"
+                                        IsEnabled="{Binding !IsScanning}" />
+                                <Button Grid.Column="1" Classes="accent" Content="Analizar"
+                                        Command="{Binding ScanCommand}" />
+                                <Button Grid.Column="2" Classes="ghost" Content="Cancelar"
+                                        Command="{Binding ScanCancelCommand}"
+                                        IsVisible="{Binding IsScanning}" />
+                            </Grid>
                         </Grid>
-                    </TreeDataTemplate>
-                </TreeView.ItemTemplate>
-            </TreeView>
-        </Grid>
 
-    </DockPanel>
+                        <ProgressBar Classes="bar" IsIndeterminate="True" IsVisible="{Binding IsScanning}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Tarjetas de resumen -->
+                <UniformGrid x:Name="Tiles" Grid.Row="2" RowSpacing="12" ColumnSpacing="12"
+                             IsVisible="{Binding HasSummary}">
+                    <Border Classes="tile">
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="caption" Text="TAMAÑO TOTAL" />
+                            <TextBlock Classes="tile-value" Text="{Binding Summary.TotalSize}"
+                                       Foreground="{DynamicResource AccentBrush}" />
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="tile">
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="caption" Text="ARCHIVOS" />
+                            <TextBlock Classes="tile-value" Text="{Binding Summary.Files}" />
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="tile">
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="caption" Text="CARPETAS" />
+                            <TextBlock Classes="tile-value" Text="{Binding Summary.Folders}" />
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="tile">
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="caption" Text="DURACIÓN" />
+                            <TextBlock Classes="tile-value" Text="{Binding Summary.Elapsed}" />
+                        </StackPanel>
+                    </Border>
+                </UniformGrid>
+
+                <!-- Resultado: encabezados + árbol -->
+                <Border Grid.Row="3" Classes="card" Padding="8" ClipToBounds="True">
+                    <Panel>
+
+                        <Grid RowDefinitions="Auto,Auto,*" IsVisible="{Binding !ShowEmptyState}">
+
+                            <!-- Mismas columnas y margen derecho que la plantilla de cada fila, para que queden alineadas. -->
+                            <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" Margin="28,8,18,8">
+                                <TextBlock Grid.Column="0" Classes="caption" Text="NOMBRE" />
+                                <TextBlock Grid.Column="1" Classes="caption size-cell" Text="TAMAÑO" />
+                                <TextBlock Grid.Column="2" Classes="caption percent-cell" Text="% DEL CONTENEDOR"
+                                           Margin="20,0,0,0" />
+                            </Grid>
+
+                            <Border Grid.Row="1" Height="1" Background="{DynamicResource BorderSubtleBrush}"
+                                    Margin="0,0,0,4" />
+
+                            <!-- Sin scroll horizontal: así el ancho de las filas se limita a la ventana y los
+                                 nombres largos se recortan con "…" en lugar de empujar las columnas fuera de vista. -->
+                            <TreeView Grid.Row="2" Background="Transparent" ItemsSource="{Binding RootNodes}"
+                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <TreeView.ItemTemplate>
+                                    <TreeDataTemplate DataType="vm:NodeViewModel" ItemsSource="{Binding Children}">
+                                        <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,5,16,5">
+
+                                            <Grid Grid.Column="0" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                                <PathIcon Grid.Column="0" Data="{StaticResource FolderIcon}" Foreground="#F5B84B"
+                                                          Width="16" Height="16" IsVisible="{Binding IsDirectory}" />
+                                                <PathIcon Grid.Column="0" Data="{StaticResource FileIcon}"
+                                                          Foreground="{DynamicResource TextMutedBrush}"
+                                                          Width="16" Height="16" IsVisible="{Binding !IsDirectory}" />
+                                                <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center"
+                                                           TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Grid.Column="2" Text="⚠" VerticalAlignment="Center" Margin="8,0,0,0"
+                                                           Foreground="{DynamicResource WarningBrush}"
+                                                           IsVisible="{Binding HasAccessErrors}"
+                                                           ToolTip.Tip="No se pudo leer todo el contenido de esta carpeta." />
+                                            </Grid>
+
+                                            <TextBlock Grid.Column="1" Classes="size-cell" Text="{Binding SizeText}"
+                                                       VerticalAlignment="Center" />
+
+                                            <!-- MinWidth="0" (en .bar): el ProgressBar de Fluent trae un ancho mínimo que desbordaba la celda. -->
+                                            <Grid Grid.Column="2" Classes="percent-cell" ColumnDefinitions="*,56"
+                                                  Margin="20,0,0,0" ClipToBounds="True">
+                                                <ProgressBar Grid.Column="0" Classes="bar" Minimum="0" Maximum="100"
+                                                             Value="{Binding Percent}" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="1" Classes="muted" Text="{Binding PercentText}"
+                                                           HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                            </Grid>
+
+                                        </Grid>
+                                    </TreeDataTemplate>
+                                </TreeView.ItemTemplate>
+                            </TreeView>
+                        </Grid>
+
+                        <!-- Estado vacío -->
+                        <StackPanel IsVisible="{Binding ShowEmptyState}" Spacing="6"
+                                    HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <PathIcon Data="{StaticResource FolderIcon}" Width="40" Height="40"
+                                      Foreground="{DynamicResource BorderSubtleBrush}" />
+                            <TextBlock Classes="muted" Text="Elige una carpeta para ver qué ocupa más espacio."
+                                       HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
+                        </StackPanel>
+
+                    </Panel>
+                </Border>
+
+            </Grid>
+        </Border>
+
+    </Panel>
 </Window>
