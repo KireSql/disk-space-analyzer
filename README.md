@@ -17,6 +17,7 @@
 
 <p align="center">
   <a href="#qué-es">Qué es</a> ·
+  <a href="#descargar">Descargar</a> ·
   <a href="#cómo-levantarlo">Cómo levantarlo</a> ·
   <a href="#cómo-funciona">Cómo funciona</a> ·
   <a href="#ubicaciones-seguras-de-limpiar">Ubicaciones seguras</a> ·
@@ -50,9 +51,21 @@ Cuando el disco se llena no es fácil saber qué lo ocupa: el Explorador de Wind
 
 Es una herramienta de **solo lectura**: nunca modifica ni borra nada de tu disco.
 
+## Descargar
+
+Si no programas y solo quieres usarlo, no necesitas instalar nada:
+
+1. Entra en la página de [**Releases**](https://github.com/KireSql/disk-space-analyzer/releases) y abre la versión más reciente.
+2. En *Assets*, descarga `DiskSpaceAnalyzer-vX.Y.Z-win-x64.zip`.
+3. Descomprime el `.zip` y abre **`DiskSpaceAnalyzer.exe`**. Es un único archivo: no necesita instalación ni tener .NET.
+
+Funciona en **Windows de 64 bits**. En Linux y macOS aún no hay versión descargable.
+
+> **Aviso de Windows:** como el programa no está firmado digitalmente, al abrirlo por primera vez puede salir *"Windows protegió su PC"*. Pulsa **Más información → Ejecutar de todas formas**. Si quieres comprobar que el archivo no se alteró, junto al `.zip` hay un `.sha256` con su huella para compararla.
+
 ## Cómo levantarlo
 
-Necesitas el [SDK de .NET 10](https://dotnet.microsoft.com/download).
+Si prefieres ejecutarlo desde el código, necesitas el [SDK de .NET 10](https://dotnet.microsoft.com/download).
 
 ```bash
 git clone https://github.com/KireSql/disk-space-analyzer.git
@@ -138,5 +151,14 @@ assets/                                Icono de la aplicación y capturas de est
 ```
 
 El icono se genera a partir de los SVG de `assets/icon/` con `python assets/icon/build-icon.py` (las instrucciones están al inicio del script).
+
+**Publicar una versión:** al subir una etiqueta que empiece por `v`, el flujo de [`.github/workflows/release.yml`](.github/workflows/release.yml) ejecuta las pruebas, genera el `.exe` autocontenido para Windows y crea la Release con el `.zip` y su `.sha256`. Si las pruebas fallan no se publica nada.
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+Una etiqueta con guion (`v1.0.0-beta`) se publica como versión preliminar. El flujo también se puede lanzar a mano desde la pestaña *Actions*: compila y prueba y deja el `.zip` como artefacto, pero no crea ninguna Release.
 
 </details>
