@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 420" width="1280" height="420" role="img" aria-labelledby="t d" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif">
+  <title id="t">Disk Space Analyzer</title>
+  <desc id="d">Encuentra qué llena tu disco. Aplicación de escritorio que muestra carpetas y archivos con su tamaño y el porcentaje que ocupan, ordenados de mayor a menor. Animación: se escribe una ruta, se analiza y aparece el árbol con barras de porcentaje.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#202026"/><stop offset="1" stop-color="#0B0B0E"/></linearGradient>
+    <radialGradient id="glow" cx="50%" cy="0%" r="80%"><stop offset="0" stop-color="#F0563C" stop-opacity=".38"/><stop offset="1" stop-color="#F0563C" stop-opacity="0"/></radialGradient>
+    <radialGradient id="bannerGlow" cx="75%" cy="0%" r="60%"><stop offset="0" stop-color="#F0563C" stop-opacity=".28"/><stop offset="1" stop-color="#F0563C" stop-opacity="0"/></radialGradient>
+    <linearGradient id="folderBack" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E5A32E"/><stop offset="1" stop-color="#C98418"/></linearGradient>
+    <linearGradient id="folderFront" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD983"/><stop offset="1" stop-color="#F5B84B"/></linearGradient>
+    <linearGradient id="coralH" gradientUnits="userSpaceOnUse" x1="926" y1="0" x2="1126" y2="0"><stop offset="0" stop-color="#F0563C"/><stop offset="1" stop-color="#FF9A6B"/></linearGradient>
+    <linearGradient id="coralP" gradientUnits="userSpaceOnUse" x1="688" y1="0" x2="1188" y2="0"><stop offset="0" stop-color="#F0563C"/><stop offset="1" stop-color="#FF9A6B"/></linearGradient>
+    <linearGradient id="coralI" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#F0563C"/><stop offset="1" stop-color="#FF9A6B"/></linearGradient>
+    <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r="1" fill="#3F3F46" fill-opacity=".45"/></pattern>
+    <clipPath id="frame"><rect x="1" y="1" width="1278" height="418" rx="28"/></clipPath>
+  </defs>
+  <style>
+  .live{animation:live 16.0s linear infinite}
+  .cover{animation:cover 16.0s steps(12,end) infinite}
+  .caret{animation:cover 16.0s steps(12,end) infinite}
+  .caret>rect{animation:blink 1s step-end infinite}
+  .prog{transform-box:fill-box;transform-origin:0 50%;animation:prog 16.0s linear infinite}
+  .s1{animation:s1 16.0s linear infinite}.s2{animation:s2 16.0s linear infinite}.s3{animation:s3 16.0s linear infinite}
+  .done{animation:done 16.0s linear infinite}
+  .bar{transform-box:fill-box;transform-origin:0 50%}
+  .g0{animation:g0 16.0s ease-out infinite}.t0{animation:t0 16.0s linear infinite}
+  .g1{animation:g1 16.0s ease-out infinite}.t1{animation:t1 16.0s linear infinite}
+  .g2{animation:g2 16.0s ease-out infinite}.t2{animation:t2 16.0s linear infinite}
+  .g3{animation:g3 16.0s ease-out infinite}.t3{animation:t3 16.0s linear infinite}
+  @media (prefers-reduced-motion:reduce){.live,.cover,.caret,.caret>rect,.prog,.s1,.s2,.s3,.done,.bar,.t0,.t1,.t2,.t3{animation:none!important}.cover,.s1,.s2,.s3{opacity:0}}
+  @keyframes live{0%{opacity:0}1.88%{opacity:1}88.75%{opacity:1}95.00%{opacity:0}100%{opacity:0}}
+  @keyframes cover{0%,5.00%{transform:translateX(0)}17.50%,100%{transform:translateX(130px)}}
+  @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+  @keyframes prog{0%,20.00%{transform:scaleX(0)}41.25%,100%{transform:scaleX(1)}}
+  @keyframes s1{0%,19.99%{opacity:0}20.00%,26.88%{opacity:1}26.89%,100%{opacity:0}}
+  @keyframes s2{0%,26.86%{opacity:0}26.88%,34.38%{opacity:1}34.38%,100%{opacity:0}}
+  @keyframes s3{0%,34.37%{opacity:0}34.38%,41.88%{opacity:1}41.88%,100%{opacity:0}}
+  @keyframes done{0%,41.88%{opacity:0}44.38%,100%{opacity:1}}
+  @keyframes g0{0%,46.25%{transform:scaleX(0)}52.50%,100%{transform:scaleX(1)}}
+  @keyframes t0{0%,46.25%{opacity:0}48.75%,100%{opacity:1}}
+  @keyframes g1{0%,49.06%{transform:scaleX(0)}55.31%,100%{transform:scaleX(1)}}
+  @keyframes t1{0%,49.06%{opacity:0}51.56%,100%{opacity:1}}
+  @keyframes g2{0%,51.88%{transform:scaleX(0)}58.13%,100%{transform:scaleX(1)}}
+  @keyframes t2{0%,51.88%{opacity:0}54.38%,100%{opacity:1}}
+  @keyframes g3{0%,54.69%{transform:scaleX(0)}60.94%,100%{transform:scaleX(1)}}
+  @keyframes t3{0%,54.69%{opacity:0}57.19%,100%{opacity:1}}
+  </style>
+
+  <!-- Fondo propio: se ve igual en el tema claro y en el oscuro de GitHub -->
+  <rect x="1" y="1" width="1278" height="418" rx="28" fill="#09090B"/>
+  <g clip-path="url(#frame)">
+    <rect width="1280" height="420" fill="url(#dots)"/>
+    <rect width="1280" height="420" fill="url(#bannerGlow)"/>
+  </g>
+  <rect x="1" y="1" width="1278" height="418" rx="28" fill="none" stroke="#27272A" stroke-width="2"/>
+
+  <!-- Marca -->
+  <g transform="translate(64 62) scale(.16)">
+    <rect x="8" y="8" width="240" height="240" rx="56" fill="url(#bg)"/>
+    <rect x="8" y="8" width="240" height="240" rx="56" fill="url(#glow)"/>
+    <path d="M34 84a16 16 0 0 1 16-16h42a12 12 0 0 1 8.5 3.5L116 84h90a16 16 0 0 1 16 16v86a16 16 0 0 1-16 16H50a16 16 0 0 1-16-16z" fill="url(#folderBack)"/>
+    <rect x="30" y="102" width="196" height="100" rx="18" fill="url(#folderFront)"/>
+    <rect x="54" y="150" width="148" height="20" rx="10" fill="#7A4A00" fill-opacity=".38"/>
+    <rect x="54" y="150" width="104" height="20" rx="10" fill="url(#coralI)"/>
+  </g>
+  <text x="112" y="87" font-size="20" font-weight="600" fill="#F4F4F5">Disk Space Analyzer</text>
+
+  <!-- Titular -->
+  <text x="64" y="196" font-size="60" font-weight="700" fill="#F4F4F5" letter-spacing="-1.5">Encuentra qué</text>
+  <text x="64" y="262" font-size="60" font-weight="700" fill="#F0563C" letter-spacing="-1.5">llena tu disco.</text>
+  <text x="64" y="318" font-size="19" fill="#A1A1AA">Carpetas y archivos con su tamaño y porcentaje,</text>
+  <text x="64" y="346" font-size="19" fill="#A1A1AA">ordenados de mayor a menor. Solo lectura.</text>
+
+  <!-- Ventana de la aplicación -->
+  <rect x="660" y="40" width="556" height="354" rx="22" fill="#111113" stroke="#27272A"/>
+  <text x="688" y="68" font-size="11" font-weight="500" letter-spacing="1.2" fill="#71717A">CARPETA A ANALIZAR</text>
+
+  <!-- Campo de ruta -->
+  <rect x="684" y="80" width="508" height="52" rx="12" fill="#09090B" stroke="#27272A"/>
+  <text x="704" y="112" font-size="18" font-weight="700" fill="#F0563C">&#x276F;</text>
+  <g class="live">
+    <text x="730" y="112" font-size="18" font-family="'Cascadia Mono', Consolas, Menlo, monospace" fill="#F4F4F5" textLength="130" lengthAdjust="spacing">D:\Proyectos</text>
+    <rect class="cover" x="729" y="94" width="300" height="28" fill="#09090B"/>
+    <g class="caret"><rect x="729" y="96" width="9" height="24" fill="#F0563C"/></g>
+  </g>
+
+  <!-- Estado del análisis -->
+  <g class="live">
+    <g font-size="14" fill="#A1A1AA">
+      <text class="s1" x="688" y="164">Analizando… 41,200 archivos</text>
+      <text class="s2" x="688" y="164">Analizando… 112,870 archivos</text>
+      <text class="s3" x="688" y="164">Analizando… 198,500 archivos</text>
+      <g class="done"><path d="M690 160l4 4 8-9" fill="none" stroke="#4ADE80" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><text x="712" y="164">Análisis completado · 3,412 archivos · 38.4 GB</text></g>
+    </g>
+    <rect x="688" y="176" width="500" height="6" rx="3" fill="#27272A"/>
+    <rect class="prog" x="688" y="176" width="500" height="6" rx="3" fill="url(#coralP)"/>
+  </g>
+
+  <!-- Árbol -->
+  <g class="live">
+    <text x="688" y="206" font-size="10" font-weight="500" letter-spacing="1.1" fill="#71717A">NOMBRE</text>
+    <text x="908" y="206" font-size="10" font-weight="500" letter-spacing="1.1" fill="#71717A" text-anchor="end">TAMAÑO</text>
+    <g class="t0" transform="translate(0 218)">
+      <path transform="translate(688 1) scale(.9)" d="M0 4a3 3 0 0 1 3-3h6l3 3h10a3 3 0 0 1 3 3v13a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3z" fill="#F5B84B"/>
+      <text x="722" y="17" font-size="16" font-weight="600" fill="#F4F4F5">Proyectos</text>
+      <text x="908" y="17" font-size="15" font-weight="500" fill="#F4F4F5" text-anchor="end">38.4 GB</text>
+      <text x="1192" y="17" font-size="14" fill="#A1A1AA" text-anchor="end">100 %</text>
+      <rect x="926" y="7" width="200" height="6" rx="3" fill="#27272A"/>
+    </g>
+    <g transform="translate(0 218)">
+      <rect class="bar g0" x="926" y="7" width="200" height="6" rx="3" fill="url(#coralH)"/>
+    </g>
+    <g class="t1" transform="translate(0 262)">
+      <path transform="translate(706 1) scale(.9)" d="M0 4a3 3 0 0 1 3-3h6l3 3h10a3 3 0 0 1 3 3v13a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3z" fill="#F5B84B"/>
+      <text x="740" y="17" font-size="16" font-weight="600" fill="#F4F4F5">juego-unity</text>
+      <text x="908" y="17" font-size="15" font-weight="500" fill="#F4F4F5" text-anchor="end">21.6 GB</text>
+      <text x="1192" y="17" font-size="14" fill="#A1A1AA" text-anchor="end">56.3 %</text>
+      <rect x="926" y="7" width="200" height="6" rx="3" fill="#27272A"/>
+    </g>
+    <g transform="translate(0 262)">
+      <rect class="bar g1" x="926" y="7" width="113" height="6" rx="3" fill="url(#coralH)"/>
+    </g>
+    <g class="t2" transform="translate(0 306)">
+      <path transform="translate(706 1) scale(.9)" d="M0 4a3 3 0 0 1 3-3h6l3 3h10a3 3 0 0 1 3 3v13a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3z" fill="#F5B84B"/>
+      <text x="740" y="17" font-size="16" font-weight="600" fill="#F4F4F5">backups</text>
+      <text x="908" y="17" font-size="15" font-weight="500" fill="#F4F4F5" text-anchor="end">9.8 GB</text>
+      <text x="1192" y="17" font-size="14" fill="#A1A1AA" text-anchor="end">25.5 %</text>
+      <rect x="926" y="7" width="200" height="6" rx="3" fill="#27272A"/>
+    </g>
+    <g transform="translate(0 306)">
+      <rect class="bar g2" x="926" y="7" width="51" height="6" rx="3" fill="url(#coralH)"/>
+    </g>
+    <g class="t3" transform="translate(0 350)">
+      <path transform="translate(706 1) scale(.9)" d="M0 4a3 3 0 0 1 3-3h6l3 3h10a3 3 0 0 1 3 3v13a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3z" fill="#F5B84B"/>
+      <text x="740" y="17" font-size="16" font-weight="600" fill="#F4F4F5">node_modules</text>
+      <text x="908" y="17" font-size="15" font-weight="500" fill="#F4F4F5" text-anchor="end">4.1 GB</text>
+      <text x="1192" y="17" font-size="14" fill="#A1A1AA" text-anchor="end">10.7 %</text>
+      <rect x="926" y="7" width="200" height="6" rx="3" fill="#27272A"/>
+    </g>
+    <g transform="translate(0 350)">
+      <rect class="bar g3" x="926" y="7" width="21" height="6" rx="3" fill="url(#coralH)"/>
+    </g>
+  </g>
+</svg>

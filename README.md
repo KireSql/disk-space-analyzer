@@ -1,12 +1,4 @@
-<p align="center">
-  <img src="assets/icon/icon.svg" alt="Icono de Disk Space Analyzer: una carpeta ámbar con una barra de uso coral" width="128" height="128">
-</p>
-
-<h1 align="center">Disk Space Analyzer</h1>
-
-<p align="center">
-  Descubre qué carpetas y archivos ocupan tu disco, ordenados por tamaño.
-</p>
+<img src="assets/readme/banner-animated.svg" alt="Disk Space Analyzer. Encuentra qué llena tu disco: carpetas y archivos con su tamaño y porcentaje, ordenados de mayor a menor. Solo lectura." width="100%" style="max-width: 100%;">
 
 <p align="center">
   <img src="https://img.shields.io/badge/.NET-10-512BD4" alt=".NET 10">
