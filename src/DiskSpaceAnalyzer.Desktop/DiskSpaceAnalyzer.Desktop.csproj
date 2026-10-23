@@ -3,8 +3,14 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>..\..\assets\icon\icon.ico</ApplicationIcon>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- El mismo .ico se incrusta como recurso para el icono de la ventana (avares://). -->
+    <AvaloniaResource Include="..\..\assets\icon\icon.ico" Link="Assets\icon.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DiskSpaceAnalyzer.Core\DiskSpaceAnalyzer.Core.csproj" />

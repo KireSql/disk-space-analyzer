@@ -480,3 +480,7 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# La regla "Icon" (macOS) coincide sin distinguir mayusculas con assets/icon; se conserva la carpeta de iconos del proyecto
+!/assets/icon/
+!/assets/icon/**

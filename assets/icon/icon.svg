@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <title>Disk Space Analyzer</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#202026"/>
+      <stop offset="1" stop-color="#0B0B0E"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="0%" r="80%">
+      <stop offset="0" stop-color="#F0563C" stop-opacity=".38"/>
+      <stop offset="1" stop-color="#F0563C" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="folderBack" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#E5A32E"/>
+      <stop offset="1" stop-color="#C98418"/>
+    </linearGradient>
+    <linearGradient id="folderFront" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFD983"/>
+      <stop offset="1" stop-color="#F5B84B"/>
+    </linearGradient>
+    <linearGradient id="coral" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#F0563C"/>
+      <stop offset="1" stop-color="#FF9A6B"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Base -->
+  <rect x="8" y="8" width="240" height="240" rx="56" fill="url(#bg)"/>
+  <rect x="8" y="8" width="240" height="240" rx="56" fill="url(#glow)"/>
+  <rect x="9" y="9" width="238" height="238" rx="55" fill="none" stroke="#3F3F46" stroke-opacity=".75" stroke-width="2"/>
+
+  <!-- Carpeta -->
+  <path d="M34 84a16 16 0 0 1 16-16h42a12 12 0 0 1 8.5 3.5L116 84h90a16 16 0 0 1 16 16v86a16 16 0 0 1-16 16H50a16 16 0 0 1-16-16z" fill="url(#folderBack)"/>
+  <rect x="30" y="102" width="196" height="100" rx="18" fill="#000" fill-opacity=".28" transform="translate(0 6)"/>
+  <rect x="30" y="102" width="196" height="100" rx="18" fill="url(#folderFront)"/>
+  <path d="M48 103h160" stroke="#FFF1CC" stroke-opacity=".7" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Barra de uso -->
+  <rect x="54" y="150" width="148" height="20" rx="10" fill="#7A4A00" fill-opacity=".38"/>
+  <rect x="54" y="150" width="104" height="20" rx="10" fill="url(#coral)"/>
+</svg>

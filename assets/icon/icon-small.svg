@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <title>Disk Space Analyzer (16-32 px)</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#26262D"/>
+      <stop offset="1" stop-color="#0B0B0E"/>
+    </linearGradient>
+    <linearGradient id="coral" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#F0563C"/>
+      <stop offset="1" stop-color="#FF8A5C"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Versión simplificada para tamaños pequeños: más carpeta, barra más gruesa, sin brillos finos -->
+  <rect x="4" y="4" width="248" height="248" rx="56" fill="url(#bg)"/>
+  <path d="M20 78a18 18 0 0 1 18-18h50a12 12 0 0 1 8.5 3.5L112 80h106a18 18 0 0 1 18 18v102a18 18 0 0 1-18 18H38a18 18 0 0 1-18-18z" fill="#D9951F"/>
+  <rect x="16" y="100" width="224" height="116" rx="20" fill="#FFCF6B"/>
+  <rect x="42" y="142" width="172" height="36" rx="18" fill="#7A4A00" fill-opacity=".4"/>
+  <rect x="42" y="142" width="120" height="36" rx="18" fill="url(#coral)"/>
+</svg>

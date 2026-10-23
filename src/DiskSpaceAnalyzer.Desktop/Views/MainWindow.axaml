@@ -4,6 +4,7 @@
         x:Class="DiskSpaceAnalyzer.Desktop.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="Disk Space Analyzer"
+        Icon="avares://DiskSpaceAnalyzer.Desktop/Assets/icon.ico"
         Background="{DynamicResource BackgroundBrush}"
         Width="1000" Height="680" MinWidth="420" MinHeight="420">
 

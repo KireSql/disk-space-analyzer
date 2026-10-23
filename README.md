@@ -1,4 +1,48 @@
-# Disk Space Analyzer
+<p align="center">
+  <img src="assets/icon/icon.svg" alt="Icono de Disk Space Analyzer: una carpeta ámbar con una barra de uso coral" width="128" height="128">
+</p>
+
+<h1 align="center">Disk Space Analyzer</h1>
+
+<p align="center">
+  Descubre qué carpetas y archivos ocupan tu disco, ordenados por tamaño.
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/.NET-10-512BD4" alt=".NET 10">
+  <img src="https://img.shields.io/badge/Avalonia-12-8B44AC" alt="Avalonia 12">
+  <img src="https://img.shields.io/badge/plataforma-Windows%20%C2%B7%20Linux%20%C2%B7%20macOS-lightgrey" alt="Plataforma: Windows, Linux y macOS">
+  <img src="https://img.shields.io/badge/modo-solo%20lectura-4ADE80" alt="Modo solo lectura">
+</p>
+
+<p align="center">
+  <a href="#resumen-del-proyecto">Resumen</a> ·
+  <a href="#requisitos">Requisitos</a> ·
+  <a href="#uso">Uso</a> ·
+  <a href="#pruebas">Pruebas</a> ·
+  <a href="#estructura">Estructura</a> ·
+  <a href="#interfaz">Interfaz</a> ·
+  <a href="#iconos">Iconos</a>
+</p>
+
+<table>
+  <tr>
+    <th align="center">Inicio</th>
+    <th align="center">Analizando</th>
+    <th align="center">Resultado</th>
+  </tr>
+  <tr>
+    <td><img src="assets/readme/screenshots/inicio.png" alt="Pantalla inicial: campo de ruta y botones Examinar y Analizar"></td>
+    <td><img src="assets/readme/screenshots/analisis.png" alt="Análisis en curso con barra de avance, contador de archivos y botón Cancelar"></td>
+    <td><img src="assets/readme/screenshots/resultado.png" alt="Resultado: tarjetas de resumen y árbol de carpetas con barras de porcentaje por elemento"></td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="assets/readme/screenshots/resultado-completo.png" alt="Análisis de una unidad completa: tamaño total, número de archivos y carpetas, espacio recuperable señalado en verde y árbol de carpetas ordenado de mayor a menor" width="100%">
+</p>
+
+---
 
 Aplicación de escritorio que lista las carpetas y archivos de un directorio junto con su tamaño, ordenados de mayor a menor y con el porcentaje que ocupa cada elemento dentro de su carpeta.
 
@@ -108,6 +152,27 @@ Tema oscuro con acento coral, definido en `src/DiskSpaceAnalyzer.Desktop/Styles/
 | < 600 px | `narrow` | Se oculta el porcentaje, los botones bajan a su propia fila y las tarjetas de resumen pasan a 2 × 2 |
 
 > Al ajustar estilos responsive: un valor escrito directamente en el elemento (`Padding="32"`) gana siempre a un estilo, así que los valores por defecto de lo que cambia con el ancho van en `Window.Styles`, no en el elemento.
+
+## Iconos
+
+Los SVG de `assets/` son la fuente; el `.ico` y los PNG se derivan de ellos.
+
+| Archivo | Uso |
+|---|---|
+| `assets/icon/icon.svg` | Icono de la aplicación (tamaños ≥ 48 px) |
+| `assets/icon/icon-small.svg` | Variante simplificada para 16, 24 y 32 px |
+| `assets/icon/icon.ico` | Icono multi-resolución (16–256 px) generado: ventana, barra de tareas y `.exe` |
+| `assets/icon/png/` | PNG intermedios generados |
+| `assets/readme/banner.svg` | Banner horizontal con fondo propio (se ve igual en el tema claro y el oscuro de GitHub); disponible, hoy el README usa el icono centrado |
+
+**Regenerar el `.ico`** tras editar los SVG, desde la raíz del repo:
+
+```bash
+pip install pillow
+python assets/icon/build-icon.py
+```
+
+El script usa Microsoft Edge o Google Chrome en modo headless solo para rasterizar el SVG, y Pillow para reducir los tamaños y empaquetar el `.ico`. Después, `dotnet build` lo incrusta en el `.exe` (`<ApplicationIcon>`) y como recurso de la ventana (`Icon` en `MainWindow.axaml`).
 
 ## Decisiones a tener en cuenta
 
