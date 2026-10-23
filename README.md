@@ -15,6 +15,7 @@ Hecha con **C# / .NET 10** y **Avalonia UI 12**, pensada para crecer: hoy corre 
 - Muestra un árbol navegable con el tamaño de cada carpeta y archivo, ordenado de mayor a menor.
 - Indica qué porcentaje ocupa cada elemento dentro de su carpeta contenedora.
 - Permite cancelar el análisis y muestra el avance mientras se ejecuta.
+- Clic derecho sobre una carpeta (o archivo) para abrirla en el explorador de archivos del sistema.
 - Marca las carpetas sin permiso de lectura y continúa con el resto.
 
 **Qué no hace todavía:** borrar o mover archivos, analizar en paralelo, graficar (treemap) ni exportar resultados. Ver [Siguientes pasos posibles](#siguientes-pasos-posibles).
@@ -38,6 +39,8 @@ Elige una carpeta (escribiendo la ruta o con **Examinar…**) y pulsa **Analizar
 ```bash
 dotnet test
 ```
+
+> **Plataformas probadas:** hasta ahora las pruebas automáticas y la aplicación se han ejecutado únicamente en **Windows 10**. En Linux y macOS todavía no se ha probado nada: la lógica (`Core`) es portable, pero falta validar la interfaz y el comportamiento del sistema de archivos (permisos, enlaces simbólicos, apertura del explorador).
 
 ## Estructura
 

@@ -1,7 +1,9 @@
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using DiskSpaceAnalyzer.Core.Formatting;
 using DiskSpaceAnalyzer.Core.Models;
+using DiskSpaceAnalyzer.Desktop.Services;
 
 namespace DiskSpaceAnalyzer.Desktop.ViewModels;
 
@@ -13,20 +15,24 @@ public sealed partial class NodeViewModel : ViewModelBase
 {
     private readonly FileSystemNode _node;
     private readonly INodeViewModelFactory _factory;
+    private readonly IFileExplorerService _fileExplorer;
     private IReadOnlyList<NodeViewModel>? _children;
 
     public NodeViewModel(
         FileSystemNode node,
         long parentSizeInBytes,
         ISizeFormatter sizeFormatter,
-        INodeViewModelFactory factory)
+        INodeViewModelFactory factory,
+        IFileExplorerService fileExplorer)
     {
         ArgumentNullException.ThrowIfNull(node);
         ArgumentNullException.ThrowIfNull(sizeFormatter);
         ArgumentNullException.ThrowIfNull(factory);
+        ArgumentNullException.ThrowIfNull(fileExplorer);
 
         _node = node;
         _factory = factory;
+        _fileExplorer = fileExplorer;
 
         SizeText = sizeFormatter.Format(node.SizeInBytes);
         Percent = parentSizeInBytes > 0 ? node.SizeInBytes * 100d / parentSizeInBytes : 0;
@@ -52,6 +58,10 @@ public sealed partial class NodeViewModel : ViewModelBase
 
     [ObservableProperty]
     public partial bool IsExpanded { get; set; }
+
+    /// <summary>Abre la carpeta (o la carpeta contenedora, si es un archivo) en el explorador del sistema.</summary>
+    [RelayCommand]
+    private Task OpenInExplorerAsync() => _fileExplorer.OpenAsync(FullPath);
 
     private NodeViewModel[] CreateChildren()
         => _node.Children

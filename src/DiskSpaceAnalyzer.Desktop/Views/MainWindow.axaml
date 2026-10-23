@@ -189,7 +189,19 @@
                                       ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                 <TreeView.ItemTemplate>
                                     <TreeDataTemplate DataType="vm:NodeViewModel" ItemsSource="{Binding Children}">
-                                        <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,5,16,5">
+                                        <!-- Background transparente: sin él, solo respondería al clic derecho sobre el texto. -->
+                                        <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,5,16,5" Background="Transparent">
+
+                                            <Grid.ContextMenu>
+                                                <ContextMenu>
+                                                    <MenuItem Header="Abrir en el explorador de archivos"
+                                                              Command="{Binding OpenInExplorerCommand}"
+                                                              IsVisible="{Binding IsDirectory}" />
+                                                    <MenuItem Header="Mostrar en el explorador de archivos"
+                                                              Command="{Binding OpenInExplorerCommand}"
+                                                              IsVisible="{Binding !IsDirectory}" />
+                                                </ContextMenu>
+                                            </Grid.ContextMenu>
 
                                             <Grid Grid.Column="0" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
                                                 <PathIcon Grid.Column="0" Data="{StaticResource FolderIcon}" Foreground="#F5B84B"

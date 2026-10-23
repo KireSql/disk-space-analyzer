@@ -2,12 +2,17 @@ using System.Globalization;
 using DiskSpaceAnalyzer.Core.Formatting;
 using DiskSpaceAnalyzer.Core.Models;
 using DiskSpaceAnalyzer.Desktop.ViewModels;
+using DiskSpaceAnalyzer.Tests.Support;
 
 namespace DiskSpaceAnalyzer.Tests.Desktop;
 
 public class NodeViewModelTests
 {
-    private readonly NodeViewModelFactory _factory = new(new BinarySizeFormatter(CultureInfo.InvariantCulture));
+    private readonly FakeFileExplorerService _explorer = new();
+    private readonly NodeViewModelFactory _factory;
+
+    public NodeViewModelTests()
+        => _factory = new NodeViewModelFactory(new BinarySizeFormatter(CultureInfo.InvariantCulture), _explorer);
 
     private static DirectoryNode SampleTree() => new(
         "root",
@@ -59,6 +64,26 @@ public class NodeViewModelTests
 
         Assert.False(file.IsDirectory);
         Assert.Empty(file.Children);
+    }
+
+    [Fact]
+    public async Task OpenInExplorerCommand_AsksTheServiceToOpenTheNodePath()
+    {
+        var folder = _factory.Create(SampleTree(), 1000).Children[0];
+
+        await folder.OpenInExplorerCommand.ExecuteAsync(null);
+
+        Assert.Equal(["/root/big"], _explorer.OpenedPaths);
+    }
+
+    [Fact]
+    public async Task OpenInExplorerCommand_PassesTheFilePathAndLeavesParentResolutionToTheService()
+    {
+        var file = _factory.Create(SampleTree(), 1000).Children[1];
+
+        await file.OpenInExplorerCommand.ExecuteAsync(null);
+
+        Assert.Equal(["/root/small.txt"], _explorer.OpenedPaths);
     }
 
     [Fact]

@@ -22,7 +22,11 @@ public class MainWindowViewModelTests
         Elapsed: TimeSpan.FromSeconds(1.5));
 
     private static MainWindowViewModel CreateViewModel(IDirectoryScanner scanner, string? pickedPath = null)
-        => new(scanner, new FakeFolderPickerService(pickedPath), new NodeViewModelFactory(Formatter), Formatter);
+        => new(
+            scanner,
+            new FakeFolderPickerService(pickedPath),
+            new NodeViewModelFactory(Formatter, new FakeFileExplorerService()),
+            Formatter);
 
     [Fact]
     public void ScanCommand_CannotRunWithoutAPath()
