@@ -1,0 +1,7 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\DiskSpaceAnalyzer.Core\DiskSpaceAnalyzer.Core.csproj" />
+  </ItemGroup>
+
+</Project>

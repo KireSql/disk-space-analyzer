@@ -1,0 +1,5 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Núcleo de dominio: sin dependencias externas ni de UI. -->
+
+</Project>
