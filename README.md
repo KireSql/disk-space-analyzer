@@ -74,7 +74,7 @@ dotnet test
 ## Cómo funciona
 
 1. **Elige una carpeta**: escribe la ruta o pulsa **Examinar…**. Puede ser una carpeta cualquiera o una unidad completa.
-2. **Pulsa Analizar**. Mientras trabaja ves cuántos archivos lleva y puedes **cancelar** cuando quieras. La ventana no se congela.
+2. **Pulsa Analizar**. Mientras trabaja ves un indicador giratorio, la barra de avance y cuántos archivos lleva, y puedes **cancelar** cuando quieras. La ventana no se congela.
 3. **Lee el resultado**:
    - Cuatro tarjetas resumen: tamaño total, archivos, carpetas y duración.
    - Un árbol que se expande carpeta a carpeta, con el tamaño de cada elemento y una barra con el porcentaje que ocupa dentro de su carpeta.
@@ -90,7 +90,7 @@ La ventana se adapta a distintos tamaños: en pantallas estrechas se simplifica 
 Algunas carpetas solo guardan archivos que Windows o los programas vuelven a crear cuando hacen falta: temporales, cachés, informes de errores. La aplicación las **señala** para que sepas dónde hay espacio recuperable:
 
 - La carpeta se tiñe de verde y lleva la etiqueta **LIMPIABLE**. Al pasar el ratón por encima explica qué contiene y qué pasa si se borra.
-- Una tarjeta **RECUPERABLE** suma el espacio de todas las que encuentre.
+- Una tarjeta **RECUPERABLE** suma el espacio de todas las que encuentre y las lista, cada una con su nombre y su peso. Al pulsar una se despliega un menú con dos opciones: **Abrir en la aplicación** (expande el árbol hasta esa carpeta y la selecciona) o **Abrir en el explorador de archivos**.
 
 **Solo se señalan, nunca se borran.** Que una carpeta aparezca marcada se decide por **dónde está**, no por lo que contiene, así que revisa su contenido antes de borrar nada (por ejemplo, con clic derecho → *Abrir en el explorador de archivos*).
 
@@ -116,7 +116,7 @@ La ruta admite variables de entorno como `%LOCALAPPDATA%`. Para otro sistema ope
 - **Solo se ha probado en Windows 10.** El programa está pensado para funcionar también en Linux y macOS, pero todavía no se ha probado allí.
 - **El tamaño es el del archivo**, no el espacio realmente ocupado en disco (que puede variar por clústeres, compresión o archivos de OneDrive que solo están en la nube).
 - **Los enlaces simbólicos y puntos de unión no se siguen**, para no contar dos veces el mismo contenido ni caer en bucles.
-- **Carpetas con cientos de miles de archivos directos** pueden tardar en desplegarse en el árbol.
+- **Las carpetas con muchos elementos se cargan poco a poco.** Al expandir una, los más pesados salen primero, la ventana sigue respondiendo y junto a la carpeta aparece un indicador con el avance (por ejemplo «100 de 2,000»). Una carpeta con decenas de miles de archivos directos puede tardar bastante en mostrarse entera.
 
 ## Próximos pasos posibles
 

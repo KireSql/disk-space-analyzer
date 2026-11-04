@@ -40,6 +40,7 @@ internal static class CompositionRoot
         // Presentación
         services.AddSingleton<IFolderPickerService>(_ => new AvaloniaFolderPickerService(topLevelAccessor));
         services.AddSingleton<IFileExplorerService>(_ => new AvaloniaFileExplorerService(topLevelAccessor));
+        services.AddSingleton<IUiYield, AvaloniaUiYield>();
         services.AddSingleton<INodeViewModelFactory, NodeViewModelFactory>();
         services.AddTransient<MainWindowViewModel>();
 

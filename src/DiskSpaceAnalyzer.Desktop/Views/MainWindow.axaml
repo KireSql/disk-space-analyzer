@@ -19,6 +19,8 @@
         <!-- Sincroniza el estado expandido del TreeViewItem con el ViewModel. -->
         <Style Selector="TreeViewItem" x:DataType="vm:NodeViewModel">
             <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+            <!-- La fila provisional "Cargando…" no se puede seleccionar ni tiene menú. -->
+            <Setter Property="IsEnabled" Value="{Binding !IsPlaceholder}" />
         </Style>
 
         <!-- Anchos de las columnas de datos. Se comparten entre encabezado y filas para que queden alineadas. -->
@@ -52,6 +54,16 @@
             <Setter Property="Grid.Row" Value="0" />
             <Setter Property="Grid.Column" Value="1" />
         </Style>
+        <Style Selector="StackPanel#ReclaimableList">
+            <Setter Property="Grid.Row" Value="0" />
+            <Setter Property="Grid.Column" Value="2" />
+        </Style>
+
+        <!-- Nombre de una ubicación recuperable: se recorta con "…" si no cabe en la pastilla. -->
+        <Style Selector="TextBlock.chip-name">
+            <Setter Property="MaxWidth" Value="300" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
 
         <!-- Responsive. La clase "compact" (< 900 px) y "narrow" (< 600 px) las gestiona MainWindow.axaml.cs. -->
         <Style Selector="Window.compact Border#Shell">
@@ -77,6 +89,20 @@
             <Setter Property="Grid.Row" Value="1" />
             <Setter Property="Grid.Column" Value="0" />
             <Setter Property="Grid.ColumnSpan" Value="2" />
+        </Style>
+        <!-- En estrecho, la lista de ubicaciones recuperables pasa debajo del importe y usa todo el ancho. -->
+        <Style Selector="Window.narrow StackPanel#ReclaimableList">
+            <Setter Property="Grid.Row" Value="1" />
+            <Setter Property="Grid.Column" Value="0" />
+            <Setter Property="Grid.ColumnSpan" Value="3" />
+            <Setter Property="Margin" Value="0,12,0,0" />
+        </Style>
+        <Style Selector="Window.narrow TextBlock.chip-name">
+            <Setter Property="MaxWidth" Value="200" />
+        </Style>
+        <!-- El contador "100 de 2,000" le quitaría el sitio al nombre de la carpeta: se queda solo el indicador. -->
+        <Style Selector="Window.narrow TextBlock.loading-progress">
+            <Setter Property="IsVisible" Value="False" />
         </Style>
     </Window.Styles>
 
@@ -128,6 +154,7 @@
                                 <TextBlock Grid.Column="0" Text="✓" FontWeight="Bold"
                                            Foreground="{DynamicResource SuccessBrush}"
                                            IsVisible="{Binding HasSummary}" />
+                                <Arc Grid.Column="0" Classes="spinner" IsVisible="{Binding IsScanning}" />
                                 <TextBlock Grid.Column="1" Classes="muted" Text="{Binding StatusMessage}"
                                            TextWrapping="Wrap" />
                             </Grid>
@@ -181,7 +208,7 @@
 
                 <!-- Solo informa: la aplicación no borra nada. -->
                 <Border Classes="callout" IsVisible="{Binding Summary.HasReclaimable}">
-                    <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="16">
+                    <Grid ColumnDefinitions="Auto,Auto,*" RowDefinitions="Auto,Auto" ColumnSpacing="16">
                         <PathIcon Grid.Column="0" Data="{StaticResource CheckCircleIcon}" Width="28" Height="28"
                                   Foreground="{DynamicResource SuccessBrush}" VerticalAlignment="Center" />
                         <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
@@ -189,11 +216,38 @@
                             <TextBlock Classes="tile-value" Text="{Binding Summary.ReclaimableSize}"
                                        Foreground="{DynamicResource SuccessBrush}" />
                         </StackPanel>
-                        <StackPanel Grid.Column="2" Spacing="2" VerticalAlignment="Center">
+                        <!-- Su fila y columna las fijan los estilos (para que "narrow" pueda moverla). -->
+                        <StackPanel x:Name="ReclaimableList" Spacing="8" VerticalAlignment="Center">
                             <TextBlock Text="{Binding Summary.ReclaimableHeadline}" FontWeight="SemiBold"
                                        TextWrapping="Wrap" />
-                            <TextBlock Classes="muted" Text="{Binding Summary.ReclaimableDetails}"
-                                       TextWrapping="Wrap" />
+
+                            <!-- Una pastilla por ubicación: solo nombre y peso (la descripción va en el tooltip).
+                                 Al pulsarla se elige entre localizarla en el árbol o abrirla en el explorador. -->
+                            <ItemsControl ItemsSource="{Binding Summary.Reclaimable}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ReclaimableItemViewModel">
+                                        <DropDownButton Classes="chip" Margin="0,0,8,8" ToolTip.Tip="{Binding Description}">
+                                            <DropDownButton.Flyout>
+                                                <MenuFlyout Placement="BottomEdgeAlignedLeft">
+                                                    <MenuItem Header="Abrir en la aplicación"
+                                                              Command="{Binding OpenInApplicationCommand}" />
+                                                    <MenuItem Header="Abrir en el explorador de archivos"
+                                                              Command="{Binding OpenInExplorerCommand}" />
+                                                </MenuFlyout>
+                                            </DropDownButton.Flyout>
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <TextBlock Classes="chip-name" Text="{Binding Name}" />
+                                                <TextBlock Classes="muted" Text="{Binding SizeText}" />
+                                            </StackPanel>
+                                        </DropDownButton>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -219,7 +273,9 @@
 
                             <!-- Sin scroll horizontal: así el ancho de las filas se limita a la ventana y los
                                  nombres largos se recortan con "…" en lugar de empujar las columnas fuera de vista. -->
-                            <TreeView Grid.Row="2" Background="Transparent" ItemsSource="{Binding RootNodes}"
+                            <TreeView x:Name="ResultTree" Grid.Row="2" Background="Transparent"
+                                      ItemsSource="{Binding RootNodes}"
+                                      SelectedItem="{Binding SelectedNode, Mode=TwoWay}"
                                       ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                 <TreeView.ItemTemplate>
                                     <TreeDataTemplate DataType="vm:NodeViewModel" ItemsSource="{Binding Children}">
@@ -237,11 +293,11 @@
                                                               IsVisible="{Binding IsDirectory}" />
                                                     <MenuItem Header="Mostrar en el explorador de archivos"
                                                               Command="{Binding OpenInExplorerCommand}"
-                                                              IsVisible="{Binding !IsDirectory}" />
+                                                              IsVisible="{Binding IsFile}" />
                                                 </ContextMenu>
                                             </Grid.ContextMenu>
 
-                                            <Grid Grid.Column="0" ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
+                                            <Grid Grid.Column="0" ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="10">
                                                 <!-- Carpeta ámbar normal, o verde si es una ubicación segura de limpiar (o está dentro de una). -->
                                                 <PathIcon Grid.Column="0" Data="{StaticResource FolderIcon}" Foreground="#F5B84B"
                                                           Width="16" Height="16" IsVisible="{Binding IsPlainDirectory}" />
@@ -250,24 +306,36 @@
                                                           Width="16" Height="16" IsVisible="{Binding IsCleanupDirectory}" />
                                                 <PathIcon Grid.Column="0" Data="{StaticResource FileIcon}"
                                                           Foreground="{DynamicResource TextMutedBrush}"
-                                                          Width="16" Height="16" IsVisible="{Binding !IsDirectory}" />
+                                                          Width="16" Height="16" IsVisible="{Binding IsFile}" />
+                                                <!-- Fila provisional mientras llegan los hijos de una carpeta grande. -->
+                                                <Arc Grid.Column="0" Classes="spinner" IsVisible="{Binding IsPlaceholder}" />
                                                 <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center"
-                                                           TextTrimming="CharacterEllipsis" />
+                                                           TextTrimming="CharacterEllipsis" IsVisible="{Binding !IsPlaceholder}" />
+                                                <TextBlock Grid.Column="1" Classes="muted" Text="{Binding LoadingText}"
+                                                           VerticalAlignment="Center" IsVisible="{Binding IsPlaceholder}" />
                                                 <Border Grid.Column="2" Classes="badge-safe" IsVisible="{Binding IsCleanupRoot}">
                                                     <TextBlock Text="LIMPIABLE" />
                                                 </Border>
-                                                <TextBlock Grid.Column="3" Text="⚠" VerticalAlignment="Center"
+                                                <!-- La propia carpeta indica que sigue cargando, aunque la fila "Cargando…" quede fuera de vista. -->
+                                                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6"
+                                                            VerticalAlignment="Center" IsVisible="{Binding IsLoadingChildren}">
+                                                    <Arc Classes="spinner" />
+                                                    <TextBlock Classes="muted loading-progress" FontSize="12" Text="{Binding LoadingProgress}"
+                                                               VerticalAlignment="Center" />
+                                                </StackPanel>
+                                                <TextBlock Grid.Column="4" Text="⚠" VerticalAlignment="Center"
                                                            Foreground="{DynamicResource WarningBrush}"
                                                            IsVisible="{Binding HasAccessErrors}"
                                                            ToolTip.Tip="No se pudo leer todo el contenido de esta carpeta." />
                                             </Grid>
 
                                             <TextBlock Grid.Column="1" Classes="size-cell" Text="{Binding SizeText}"
-                                                       VerticalAlignment="Center" />
+                                                       VerticalAlignment="Center" IsVisible="{Binding !IsPlaceholder}" />
 
                                             <!-- MinWidth="0" (en .bar): el ProgressBar de Fluent trae un ancho mínimo que desbordaba la celda. -->
                                             <Grid Grid.Column="2" Classes="percent-cell" ColumnDefinitions="*,56"
-                                                  Margin="20,0,0,0" ClipToBounds="True">
+                                                  Margin="20,0,0,0" ClipToBounds="True"
+                                                  IsVisible="{Binding !IsPlaceholder}">
                                                 <ProgressBar Grid.Column="0" Classes="bar" Minimum="0" Maximum="100"
                                                              Value="{Binding Percent}" VerticalAlignment="Center" />
                                                 <TextBlock Grid.Column="1" Classes="muted" Text="{Binding PercentText}"

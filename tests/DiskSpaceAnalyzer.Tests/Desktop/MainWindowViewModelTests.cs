@@ -22,7 +22,9 @@ public class MainWindowViewModelTests
         InaccessibleDirectories: inaccessible,
         Elapsed: TimeSpan.FromSeconds(1.5));
 
-    private static MainWindowViewModel CreateViewModel(
+    private readonly FakeFileExplorerService _explorer = new();
+
+    private MainWindowViewModel CreateViewModel(
         IDirectoryScanner scanner,
         string? pickedPath = null,
         CleanupAdvisor? cleanup = null)
@@ -32,9 +34,10 @@ public class MainWindowViewModelTests
         return new MainWindowViewModel(
             scanner,
             new FakeFolderPickerService(pickedPath),
-            new NodeViewModelFactory(Formatter, new FakeFileExplorerService(), cleanup),
+            new NodeViewModelFactory(Formatter, _explorer, cleanup, new FakeUiYield()),
             Formatter,
-            cleanup);
+            cleanup,
+            _explorer);
     }
 
     [Fact]
@@ -174,6 +177,97 @@ public class MainWindowViewModelTests
         Assert.Empty(vm.RootNodes);
         Assert.Null(vm.Summary);
         Assert.True(vm.ShowEmptyState);
+    }
+
+    // ---- Aviso RECUPERABLE: abrir en la aplicación / en el explorador ----
+
+    // Rutas reales del sistema (no "/root/..."): el motor de reglas compara con el separador de cada SO.
+    private static readonly string NestedRoot = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "dsa-reveal"));
+    private static readonly string NestedCache = Path.Combine(NestedRoot, "cache");
+    private static readonly string NestedTemp = Path.Combine(NestedCache, "temp");
+
+    private static ScanResult NestedResult() => new(
+        new DirectoryNode(
+            "dsa-reveal",
+            NestedRoot,
+            [
+                new DirectoryNode(
+                    "cache",
+                    NestedCache,
+                    [new DirectoryNode("temp", NestedTemp, [new FileNode("a.tmp", Path.Combine(NestedTemp, "a.tmp"), 4096)])]),
+                new FileNode("keep.txt", Path.Combine(NestedRoot, "keep.txt"), 10),
+            ]),
+        FilesScanned: 2,
+        DirectoriesScanned: 3,
+        InaccessibleDirectories: 0,
+        Elapsed: TimeSpan.FromSeconds(1));
+
+    private static CleanupAdvisor TempRule()
+        => new([new CleanupRule("temp", "Temporales", "Se regeneran.", NestedTemp)], CleanupAdvisor.DefaultComparison);
+
+    [Fact]
+    public async Task OpeningARecoverableLocationInTheApplication_ExpandsTheTreeAndSelectsIt()
+    {
+        var vm = CreateViewModel(FakeDirectoryScanner.Returning(NestedResult()), cleanup: TempRule());
+        vm.SelectedPath = NestedRoot;
+        await vm.ScanCommand.ExecuteAsync(null);
+        var item = Assert.Single(vm.Summary!.Reclaimable);
+
+        await item.OpenInApplicationCommand.ExecuteAsync(null);
+
+        Assert.Equal(NestedTemp, vm.SelectedNode?.FullPath);
+        Assert.True(vm.RootNodes[0].Children.Single(c => c.Name == "cache").IsExpanded);
+    }
+
+    [Fact]
+    public async Task OpeningARecoverableLocationInTheExplorer_DoesNotTouchTheTree()
+    {
+        var vm = CreateViewModel(FakeDirectoryScanner.Returning(NestedResult()), cleanup: TempRule());
+        vm.SelectedPath = NestedRoot;
+        await vm.ScanCommand.ExecuteAsync(null);
+        var item = Assert.Single(vm.Summary!.Reclaimable);
+
+        await item.OpenInExplorerCommand.ExecuteAsync(null);
+
+        Assert.Equal([NestedTemp], _explorer.OpenedPaths);
+        Assert.Null(vm.SelectedNode);
+    }
+
+    [Fact]
+    public async Task RevealInTree_WithAnUnknownPath_KeepsTheCurrentSelection()
+    {
+        var vm = CreateViewModel(FakeDirectoryScanner.Returning(NestedResult()));
+        vm.SelectedPath = NestedRoot;
+        await vm.ScanCommand.ExecuteAsync(null);
+
+        await vm.RevealInTreeAsync("/elsewhere");
+
+        Assert.Null(vm.SelectedNode);
+    }
+
+    [Fact]
+    public async Task RevealInTree_WithoutAResult_DoesNothing()
+    {
+        var vm = CreateViewModel(FakeDirectoryScanner.Returning(NestedResult()));
+
+        await vm.RevealInTreeAsync(NestedCache);
+
+        Assert.Null(vm.SelectedNode);
+    }
+
+    [Fact]
+    public async Task NewScan_ClearsTheSelection()
+    {
+        var vm = CreateViewModel(FakeDirectoryScanner.Returning(NestedResult()));
+        vm.SelectedPath = NestedRoot;
+        await vm.ScanCommand.ExecuteAsync(null);
+        await vm.RevealInTreeAsync(NestedCache);
+        Assert.NotNull(vm.SelectedNode);
+
+        await vm.ScanCommand.ExecuteAsync(null);
+
+        Assert.Equal(NestedRoot, vm.RootNodes.Single().FullPath);
+        Assert.Null(vm.SelectedNode);
     }
 
     [Fact]

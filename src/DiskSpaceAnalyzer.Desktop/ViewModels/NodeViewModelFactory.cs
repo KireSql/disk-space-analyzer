@@ -10,19 +10,23 @@ public sealed class NodeViewModelFactory : INodeViewModelFactory
     private readonly ISizeFormatter _sizeFormatter;
     private readonly IFileExplorerService _fileExplorer;
     private readonly ICleanupClassifier _cleanupClassifier;
+    private readonly IUiYield _uiYield;
 
     public NodeViewModelFactory(
         ISizeFormatter sizeFormatter,
         IFileExplorerService fileExplorer,
-        ICleanupClassifier cleanupClassifier)
+        ICleanupClassifier cleanupClassifier,
+        IUiYield uiYield)
     {
         ArgumentNullException.ThrowIfNull(sizeFormatter);
         ArgumentNullException.ThrowIfNull(fileExplorer);
         ArgumentNullException.ThrowIfNull(cleanupClassifier);
+        ArgumentNullException.ThrowIfNull(uiYield);
 
         _sizeFormatter = sizeFormatter;
         _fileExplorer = fileExplorer;
         _cleanupClassifier = cleanupClassifier;
+        _uiYield = uiYield;
     }
 
     public NodeViewModel Create(FileSystemNode node, long parentSizeInBytes)
@@ -32,5 +36,6 @@ public sealed class NodeViewModelFactory : INodeViewModelFactory
             _sizeFormatter,
             this,
             _fileExplorer,
+            _uiYield,
             _cleanupClassifier.Classify(node.FullPath));
 }

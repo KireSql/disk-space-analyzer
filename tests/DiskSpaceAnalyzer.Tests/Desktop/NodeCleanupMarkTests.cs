@@ -18,7 +18,8 @@ public class NodeCleanupMarkTests
         new FakeFileExplorerService(),
         new CleanupAdvisor(
             [new CleanupRule("temp", "Archivos temporales", "Se vuelven a crear solos.", Temp)],
-            StringComparison.Ordinal));
+            StringComparison.Ordinal),
+        new FakeUiYield());
 
     private static DirectoryNode Dir(string path, params FileSystemNode[] children)
         => new(Path.GetFileName(path), path, children);
@@ -68,14 +69,29 @@ public class NodeCleanupMarkTests
     }
 
     [Fact]
-    public void ChildrenOfTheSafeLocation_AreMarkedWhenTheyAreCreated()
+    public async Task ChildrenOfTheSafeLocation_AreMarkedWhenTheyAreCreated()
     {
         var tree = Dir(Temp, Dir(Path.Combine(Temp, "cache"), new FileNode("a.bin", Path.Combine(Temp, "cache", "a.bin"), 10)));
+        var root = _factory.Create(tree, 10);
+        await root.LoadChildrenAsync();
 
-        var cache = _factory.Create(tree, 10).Children[0];
+        var cache = root.Children[0];
 
         Assert.True(cache.IsCleanupMarked);
         Assert.False(cache.IsCleanupRoot);
+    }
+
+    [Fact]
+    public void TheLoadingRow_IsNeverShownAsACleanupFolder()
+    {
+        var folder = _factory.Create(Dir(Temp, new FileNode("a.bin", Path.Combine(Temp, "a.bin"), 10)), 10);
+
+        var loadingRow = Assert.Single(folder.Children);
+
+        Assert.True(loadingRow.IsPlaceholder);
+        Assert.False(loadingRow.IsCleanupMarked);
+        Assert.False(loadingRow.IsCleanupDirectory);
+        Assert.False(loadingRow.IsPlainDirectory);
     }
 
     [Fact]

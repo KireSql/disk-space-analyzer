@@ -1,5 +1,7 @@
+using System.ComponentModel;
 using Avalonia;
 using Avalonia.Controls;
+using DiskSpaceAnalyzer.Desktop.ViewModels;
 
 namespace DiskSpaceAnalyzer.Desktop.Views;
 
@@ -11,7 +13,13 @@ public partial class MainWindow : Window
     /// <summary>Por debajo de este ancho (px) se oculta el porcentaje y las tarjetas pasan a dos columnas.</summary>
     private const double NarrowMaxWidth = 600;
 
-    public MainWindow() => InitializeComponent();
+    private MainWindowViewModel? _viewModel;
+
+    public MainWindow()
+    {
+        InitializeComponent();
+        DataContextChanged += (_, _) => AttachViewModel();
+    }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
@@ -31,5 +39,51 @@ public partial class MainWindow : Window
     {
         Classes.Set("compact", width < CompactMaxWidth);
         Classes.Set("narrow", width < NarrowMaxWidth);
+    }
+
+    private void AttachViewModel()
+    {
+        if (_viewModel is not null)
+        {
+            _viewModel.PropertyChanged -= OnViewModelPropertyChanged;
+        }
+
+        _viewModel = DataContext as MainWindowViewModel;
+
+        if (_viewModel is not null)
+        {
+            _viewModel.PropertyChanged += OnViewModelPropertyChanged;
+        }
+    }
+
+    private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(MainWindowViewModel.SelectedNode) && _viewModel?.SelectedNode is { } node)
+        {
+            _ = BringIntoViewAsync(node);
+        }
+    }
+
+    /// <summary>
+    /// Desplaza el árbol hasta la fila seleccionada. Su contenedor no existe hasta el siguiente pase de
+    /// diseño (y, en carpetas grandes, hasta que llegan sus filas), así que se reintenta unos instantes.
+    /// </summary>
+    private async Task BringIntoViewAsync(NodeViewModel node)
+    {
+        for (var attempt = 0; attempt < 40; attempt++)
+        {
+            if (ResultTree.TreeContainerFromItem(node) is { } container)
+            {
+                container.BringIntoView();
+                return;
+            }
+
+            await Task.Delay(50);
+
+            if (!ReferenceEquals(_viewModel?.SelectedNode, node))
+            {
+                return;
+            }
+        }
     }
 }

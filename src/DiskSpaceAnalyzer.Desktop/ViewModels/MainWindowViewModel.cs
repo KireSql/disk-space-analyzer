@@ -17,25 +17,29 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     private readonly INodeViewModelFactory _nodeFactory;
     private readonly ISizeFormatter _sizeFormatter;
     private readonly ICleanupAnalyzer _cleanupAnalyzer;
+    private readonly IFileExplorerService _fileExplorer;
 
     public MainWindowViewModel(
         IDirectoryScanner scanner,
         IFolderPickerService folderPicker,
         INodeViewModelFactory nodeFactory,
         ISizeFormatter sizeFormatter,
-        ICleanupAnalyzer cleanupAnalyzer)
+        ICleanupAnalyzer cleanupAnalyzer,
+        IFileExplorerService fileExplorer)
     {
         ArgumentNullException.ThrowIfNull(scanner);
         ArgumentNullException.ThrowIfNull(folderPicker);
         ArgumentNullException.ThrowIfNull(nodeFactory);
         ArgumentNullException.ThrowIfNull(sizeFormatter);
         ArgumentNullException.ThrowIfNull(cleanupAnalyzer);
+        ArgumentNullException.ThrowIfNull(fileExplorer);
 
         _scanner = scanner;
         _folderPicker = folderPicker;
         _nodeFactory = nodeFactory;
         _sizeFormatter = sizeFormatter;
         _cleanupAnalyzer = cleanupAnalyzer;
+        _fileExplorer = fileExplorer;
     }
 
     [ObservableProperty]
@@ -62,6 +66,29 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     /// <summary>Raíz del árbol mostrado (una sola, pero el TreeView espera una colección).</summary>
     public ObservableCollection<NodeViewModel> RootNodes { get; } = [];
 
+    /// <summary>Fila seleccionada en el árbol (la vista la enlaza en los dos sentidos).</summary>
+    [ObservableProperty]
+    public partial NodeViewModel? SelectedNode { get; set; }
+
+    /// <summary>
+    /// Localiza una ruta en el árbol: expande las carpetas que la contienen y deja su fila seleccionada
+    /// (la vista se encarga de desplazarla hasta que se vea).
+    /// </summary>
+    public async Task RevealInTreeAsync(string path)
+    {
+        var root = RootNodes.FirstOrDefault();
+        if (root is null)
+        {
+            return;
+        }
+
+        var target = await root.RevealAsync(path, CleanupAdvisor.DefaultComparison);
+        if (target is not null)
+        {
+            SelectedNode = target;
+        }
+    }
+
     [RelayCommand]
     private async Task BrowseAsync()
     {
@@ -80,6 +107,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     {
         IsScanning = true;
         Summary = null;
+        SelectedNode = null;
         RootNodes.Clear();
         StatusMessage = "Analizando…";
 
@@ -93,7 +121,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             root.IsExpanded = true;
             RootNodes.Add(root);
 
-            Summary = new ScanSummaryViewModel(result, _sizeFormatter, _cleanupAnalyzer.Analyze(result.Root));
+            Summary = new ScanSummaryViewModel(
+                result, _sizeFormatter, _cleanupAnalyzer.Analyze(result.Root), _fileExplorer, RevealInTreeAsync);
             StatusMessage = BuildCompletionMessage(result);
         }
         catch (OperationCanceledException)

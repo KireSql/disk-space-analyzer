@@ -1,17 +1,27 @@
 using DiskSpaceAnalyzer.Core.Cleanup;
 using DiskSpaceAnalyzer.Core.Formatting;
 using DiskSpaceAnalyzer.Core.Models;
+using DiskSpaceAnalyzer.Desktop.Services;
 
 namespace DiskSpaceAnalyzer.Desktop.ViewModels;
 
 /// <summary>Cifras de un análisis ya formateadas para mostrarse en las tarjetas de resumen.</summary>
 public sealed class ScanSummaryViewModel
 {
-    public ScanSummaryViewModel(ScanResult result, ISizeFormatter sizeFormatter, CleanupReport cleanupReport)
+    /// <param name="fileExplorer">Para abrir una ubicación recuperable en el explorador de archivos.</param>
+    /// <param name="revealInTree">Localiza una ruta en el árbol de la aplicación.</param>
+    public ScanSummaryViewModel(
+        ScanResult result,
+        ISizeFormatter sizeFormatter,
+        CleanupReport cleanupReport,
+        IFileExplorerService fileExplorer,
+        Func<string, Task> revealInTree)
     {
         ArgumentNullException.ThrowIfNull(result);
         ArgumentNullException.ThrowIfNull(sizeFormatter);
         ArgumentNullException.ThrowIfNull(cleanupReport);
+        ArgumentNullException.ThrowIfNull(fileExplorer);
+        ArgumentNullException.ThrowIfNull(revealInTree);
 
         TotalSize = sizeFormatter.Format(result.Root.SizeInBytes);
         Files = result.FilesScanned.ToString("N0");
@@ -30,9 +40,9 @@ public sealed class ScanSummaryViewModel
         ReclaimableHeadline = reclaimable.Length == 1
             ? "1 ubicación segura de limpiar, marcada en verde en el árbol"
             : $"{reclaimable.Length} ubicaciones seguras de limpiar, marcadas en verde en el árbol";
-        ReclaimableDetails = string.Join(
-            " · ",
-            reclaimable.Select(finding => $"{finding.Rule.Name} ({sizeFormatter.Format(finding.Node.SizeInBytes)})"));
+        Reclaimable = reclaimable
+            .Select(finding => new ReclaimableItemViewModel(finding, sizeFormatter, fileExplorer, revealInTree))
+            .ToArray();
     }
 
     public string TotalSize { get; }
@@ -53,6 +63,6 @@ public sealed class ScanSummaryViewModel
 
     public string ReclaimableHeadline { get; }
 
-    /// <summary>Desglose "Nombre (tamaño) · Nombre (tamaño)", de mayor a menor.</summary>
-    public string ReclaimableDetails { get; }
+    /// <summary>Las ubicaciones recuperables con contenido, de mayor a menor.</summary>
+    public IReadOnlyList<ReclaimableItemViewModel> Reclaimable { get; }
 }
